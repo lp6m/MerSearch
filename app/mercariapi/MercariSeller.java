@@ -26,7 +26,7 @@ public class MercariSeller{
 	public String photo_url;
 	public String photo_thumbnail_url;
 	public String register_sms_confirmation;
-	public String register_sms_confirmation_at;
+	//public String register_sms_confirmation_at;
 
 	public MercariSeller(JSONObject json){
 		try{
@@ -35,7 +35,7 @@ public class MercariSeller{
 			this.photo_url = json.getString("photo_url");
 			this.photo_thumbnail_url = json.getString("photo_thumbnail_url");
 			this.register_sms_confirmation = json.getString("register_sms_confirmation");
-			this.register_sms_confirmation_at = json.getString("register_sms_confirmation_at");
+			//this.register_sms_confirmation_at = json.getString("register_sms_confirmation_at");
 		}catch(Exception e){
 			e.printStackTrace();
 		}

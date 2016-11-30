@@ -49,8 +49,8 @@ public class MercariItem{
 			this.id = json.getInt("id");
 			this.name = json.getString("name");
 			this.display_order = json.getInt("display_order");
-			this.parent_category_id = json.getInt("parent_category_id");
-			this.parent_category_name = json.getString("parent_category_name");
+			//this.parent_category_id = json.getInt("parent_category_id");
+			//this.parent_category_name = json.getString("parent_category_name");
 			this.root_category_id = json.getInt("root_category_id");
 			this.root_category_name = json.getString("root_category_name");
 		}
@@ -92,7 +92,6 @@ public class MercariItem{
 			if(o == 3) t.add("sold_out");
 		}
 		if(t.size() == 0) return "";
-		else return String.join(",",t);
+		else return String.join("%2C",t); //%2Cは,のこと
 	}
-
 }

@@ -39,7 +39,7 @@ public class MercariAPI{
 		List<SimpleEntry<String,String>> ToPairList(){
 			//空文字列あるいは空リストの場合そのオプションはなし
 			List<SimpleEntry<String,String>> rst = new ArrayList<SimpleEntry<String,String>>();
-			if(this.sellerid != "") rst.add(new SimpleEntry<String,String>("sellerid",this.sellerid));
+			if(this.sellerid != "") rst.add(new SimpleEntry<String,String>("seller_id",this.sellerid));
 			if(this.status_list.size() != 0) rst.add(new SimpleEntry<String,String>("status",MercariItem.ItemStatusListToString(this.status_list)));
 			return rst;
 		}
@@ -74,7 +74,6 @@ public class MercariAPI{
 
         String res = "";
         if(rawres.error) return res;
-        System.out.println(rawres.response);
         try{
             JSONObject resjson = new JSONObject(rawres.response);
             res = resjson.getJSONObject("data").getString("access_token");
@@ -160,7 +159,6 @@ public class MercariAPI{
 	
     //特定のsellerIDの商品をすべて取得
     //List<Integer> status_option := 商品の状態1:on_sale 2:trading 3:sold_out
-    //現時点ではとりあえず商品IDのList<String>を返すようにした.
     public List<MercariItem> GetAllItemsWithSellers(String sellerid,List<Integer> status_list){
 		GetItemsOption option = new GetItemsOption();
 		option.sellerid = sellerid;
@@ -175,7 +173,7 @@ public class MercariAPI{
         default_param.add(new SimpleEntry<String,String>("_global_access_token",this.global_access_token));
 	    default_param.addAll(option.ToPairList());
 		default_param.add(new SimpleEntry<String,String>("limit","60"));
-       
+        //default_param.add(new SimpleEntry<String,String>("pixel_ratio","4.0"));
         List<MercariItem> res = new ArrayList<MercariItem>();
 
 		//60個以上あるか
@@ -191,14 +189,13 @@ public class MercariAPI{
 			if(rawres.error) return res;
 			try{
 				JSONObject resjson = new JSONObject(rawres.response);
+				System.out.println(resjson);
 				JSONArray datas = resjson.getJSONArray("data");
 				has_next = resjson.getJSONObject("meta").getBoolean("has_next");
 				//1件ずつデータとりだし
-				System.out.println(datas.length());
 				for(int i = 0; i < datas.length(); i++){
 					JSONObject iteminfo = datas.getJSONObject(i);
 					MercariItem item = new MercariItem(iteminfo);
-					System.out.println(item.name);
 					res.add(item);
 					max_pager_id = item.pager_id.toString(); //次のリクエストで使うためにmax_pager_id更新
 				}
@@ -206,7 +203,7 @@ public class MercariAPI{
 				e.printStackTrace();
 				return res;
 			}
-		}while(has_next = true);
+		}while(has_next == true);
         return res;
     }
 }
