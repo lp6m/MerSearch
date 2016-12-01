@@ -19,6 +19,8 @@ import java.nio.charset.Charset;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
 
 public class MercariItem{
 	public String id;
@@ -36,6 +38,9 @@ public class MercariItem{
 	public String shipping_from_area; //発送都道府県
 	public ItemCategory category;
 	public List<String> imageurls; //画像URL
+
+	public String updated_str; //Unixタイムスタンプを変換したもの
+	public String created_str;
 	
 	public class ItemCategory{
 		public Integer id;
@@ -77,6 +82,11 @@ public class MercariItem{
 			for(int i = 0; i < thumburls.length(); i++){
 				this.imageurls.add(thumburls.getString(i));
 			}
+			Date updated_date = new Date(this.updated * 1000);
+			Date created_date = new Date(this.created * 1000);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+			this.updated_str = sdf.format(updated_date.getTime()).toString();
+			this.created_str = sdf.format(created_date.getTime()).toString();
 			
 		}catch(Exception e){
 			e.printStackTrace();
