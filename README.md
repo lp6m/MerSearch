@@ -1,10 +1,10 @@
-*MerSearch
+#MerSearch
 
-**MercariSearcher.java
+##MercariSearcher.java
 ログイン不要でできる動作を行う.商品の検索など.
-***GetItemInfobyItemID
-***GetAllItemsWithSellers
+- GetItemInfobyItemID
+- GetAllItemsWithSellers
 
-**MercariExhibitter.java
+##MercariExhibitter.java
 ログインを要する動作を行う.商品の出品・削除など.
-***Sell
+- Sell
