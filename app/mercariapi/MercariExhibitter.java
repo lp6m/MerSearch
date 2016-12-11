@@ -35,6 +35,8 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 //複数アカウント使用可能にするため,staticにはしていない
@@ -50,14 +52,19 @@ public class MercariExhibitter{
 		cookiestr = "G_ENABLED_IDPS=google; PHPSESSID=" + PHPSESSID;
 	}
 	
+	/*商品の出品 商品情報を返す*/
 	public MercariItem Sell(MercariExhibitItem item){
 		try{
 			/*パラメータの用意*/
 			List<SimpleEntry<String,String>> param = item.toParamList();
-			String csrf = GetCSRFToken();
-			param.add(new SimpleEntry<String,String>("__csrf_value",csrf));
-			/*出品*/
-			String rst = SendPostMercariform("https://www.mercari.com/jp/sell/selling/",param);
+			param.add(GetCSRFParam());
+			String res = SendPostMercariform("https://www.mercari.com/jp/sell/selling/",param);
+			/*itemidの取り出し*/
+			JSONObject resjson = new JSONObject(response);
+			String itemid = resjson.getJSONObject("item").getString("id");
+			/*出品したあと出品IDから商品情報をとってきて返す*/
+			MercariSearcher s = new MercariSearcher();
+			return s.GetItemInfobyItemID(itemid);
 		}catch(Exception e){
 			e.printStackTrace();
 			System.out.println("出品に失敗しました");
@@ -65,9 +72,18 @@ public class MercariExhibitter{
 		}
 		return null;
 	}
-	/*商品出品ページのHTMLからCSRFトークンを取得
+	/*商品の削除*/
+	public Boolean Cancel(String itemID){
+		SendPostMercariform("https://www.mercari.com/jp/items/cancel/"+itemID,GetCSRFParam());
+		/*TODO:商品ページに実際にアクセスして消えていればOK*/
+		return true;
+	}
+	public Boolean Cancel(MercariItem item){
+		return Cancel(item.id);
+	}
+	/*商品出品ページのHTMLからCSRFトークンを取得してSimpleEntryを返す
 	  毎回同じとは限らないので出品するごとに取得する*/
-	private String GetCSRFToken() throws Exception {
+	private SimpleEntry<String,String> GetCSRFParam() throws Exception {
 		URL url = new URL("https://www.mercari.com/jp/sell/");
 		URLConnection conn = url.openConnection();
 		conn.setRequestProperty("cookie",this.cookiestr);
@@ -83,7 +99,8 @@ public class MercariExhibitter{
 		Pattern csrf_pattern = Pattern.compile("App.setCsrfToken\\(\'([^<]+)\'\\)",Pattern.CASE_INSENSITIVE);
 		Matcher matcher1 = csrf_pattern.matcher(response.toString());
 		if(matcher1.find() ) {
-			return matcher1.group(1);
+			String rst = matcher1.group(1);
+			return new SimpleEntry<String,String>("__csrf_value",rst);
 		}
 		return null;
 	}
