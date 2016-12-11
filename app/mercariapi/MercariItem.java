@@ -102,6 +102,6 @@ public class MercariItem{
 			if(o == 3) t.add("sold_out");
 		}
 		if(t.size() == 0) return "";
-		else return String.join("%2C",t); //%2Cは,のこと
+		else return String.join(",",t);
 	}
 }

@@ -19,6 +19,8 @@ import java.nio.charset.Charset;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.net.URLEncoder;
+import java.net.URLDecoder;
 
 public class MercariSearcher{
     private final String USER_AGENT = "Mercari_r/511 (Android 23; ja; arm64-v8a,; samsung SC-02H Build/6.0.1)";
@@ -176,7 +178,9 @@ public class MercariSearcher{
             url += "?";
             List<String> paramstr = new ArrayList<String>();
             for (SimpleEntry p:param) {
-                paramstr.add(p.getKey().toString() + "=" + p.getValue().toString());
+				String k = URLEncoder.encode(p.getKey().toString(),"UTF-8");
+				String v = URLEncoder.encode(p.getValue().toString(),"UTF-8");
+                paramstr.add(k + "=" + v);
             }
             url += String.join("&",paramstr);
             
@@ -229,7 +233,9 @@ public class MercariSearcher{
 			String urlParameters = "";
 			List<String> paramstr = new ArrayList<String>();
             for (SimpleEntry p:param) {
-                paramstr.add(p.getKey().toString() + "=" + p.getValue().toString());
+				String k = URLEncoder.encode(p.getKey().toString(),"UTF-8");
+				String v = URLEncoder.encode(p.getValue().toString(),"UTF-8");
+                paramstr.add(k + "=" + v);
             }
             urlParameters = String.join("&",paramstr);
             
