@@ -20,7 +20,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class MercariAPI{
+public class MercariSearcher{
     private final String USER_AGENT = "Mercari_r/511 (Android 23; ja; arm64-v8a,; samsung SC-02H Build/6.0.1)";
     private final String XPLATFORM = "android";
     private final String XAPPVERSION = "511";
@@ -48,7 +48,7 @@ public class MercariAPI{
     public String access_token;
     public String global_access_token;
     public String global_refresh_token;
-    public MercariAPI(){
+    public MercariSearcher(){
         MercariAPIInitialize();
     }
     
@@ -153,6 +153,49 @@ public class MercariAPI{
     private MercariRawResponse SendMercariAPIwithPOST(String url,List<SimpleEntry<String,String>> param){
         //未実装
         MercariRawResponse res = new MercariRawResponse();
+		try{
+			URL obj = new URL(url);
+            
+			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+
+			//add reuqest header
+			con.setRequestMethod("POST");
+			//パラメータ設定
+            con.setRequestProperty("User-Agent",USER_AGENT);
+            con.setRequestProperty("X-PLATFORM",XPLATFORM);
+            con.setRequestProperty("X-APP-VERSION",XAPPVERSION); 
+
+			//パラメータ作成
+			String urlParameters = "";
+			List<String> paramstr = new ArrayList<String>();
+            for (SimpleEntry p:param) {
+                paramstr.add(p.getKey().toString() + "=" + p.getValue().toString());
+            }
+            urlParameters = String.join("&",paramstr);
+            
+			// Send post request
+			con.setDoOutput(true);
+			DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			wr.writeBytes(urlParameters);
+			wr.flush();
+			wr.close();
+
+			int responseCode = con.getResponseCode();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			//print result
+			System.out.println(response.toString());
+		}catch(Exception e){
+			e.printStackTrace();
+		}
         return res;
     }
 

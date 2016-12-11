@@ -9,7 +9,7 @@ import java.util.*;
 import views.html.*;
 
 public class Application extends Controller {
-	public static MercariAPI mercariapi;
+	public static MercariSearcher mercariapi;
     public static Result index() {
         return ok(index.render("Your new application is ready."));
     }
@@ -20,7 +20,7 @@ public class Application extends Controller {
 		Form<SearchForm> searchform = new Form<SearchForm>(SearchForm.class).bindFromRequest();
 		String sellerid = searchform.get().sellerid; //"220249289"
 		System.out.println(sellerid);
-		mercariapi = new MercariAPI();
+		mercariapi = new MercariSearcher();
 		System.out.println(mercariapi.access_token);
 		List<MercariItem> res = mercariapi.GetAllItemsWithSellers(sellerid,new ArrayList<Integer>(Arrays.asList(2,3)));
 		return ok(searchresult.render(res));
