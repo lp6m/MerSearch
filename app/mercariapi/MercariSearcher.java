@@ -65,6 +65,66 @@ public class MercariSearcher{
         return rst;
     }
 
+	//特定のitemIDの商品情報を取得
+	//このAPIではコメントなどの情報も取得できるが現時点では取り出していない
+	public MercariItem GetItemInfobyItemID(String itemid){
+		List<SimpleEntry<String,String>> param = GetTokenParamListForMercariAPI();
+		param.add(new SimpleEntry<String,String>("id",itemid));
+		MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get",param);
+		System.out.println(rawres.response);
+		JSONObject resjson = new JSONObject(rawres.response);
+		JSONObject iteminfo = resjson.getJSONObject("data");
+		MercariItem item = new MercariItem(iteminfo);
+		System.out.println(item);
+		return item;
+	}
+    //特定のsellerIDの商品をすべて取得
+    //List<Integer> status_option := 商品の状態1:on_sale 2:trading 3:sold_out
+    public List<MercariItem> GetAllItemsWithSellers(String sellerid,List<Integer> status_list){
+		GetItemsOption option = new GetItemsOption();
+		option.sellerid = sellerid;
+		option.status_list = status_list;
+        return GetItems(option);
+    }
+    //コンディションに応じて商品を取得する
+    //一度のリクエストで取れるのは最大で60個 60個を超える場合は複数回APIを叩いて結果を取得する.
+    private List<MercariItem> GetItems(GetItemsOption option){
+        List<SimpleEntry<String,String>> default_param = GetTokenParamListForMercariAPI();
+		default_param.addAll(option.ToPairList());
+		default_param.add(new SimpleEntry<String,String>("limit","60"));
+        //default_param.add(new SimpleEntry<String,String>("pixel_ratio","4.0"));
+        List<MercariItem> res = new ArrayList<MercariItem>();
+
+		//60個以上あるか
+		Boolean has_next = false;
+		//2回目以降でつかうmax_pager_id
+	    String max_pager_id = "";
+		do{
+			List<SimpleEntry<String,String>> param = new ArrayList<SimpleEntry<String,String>>();
+			param.addAll(default_param);
+			 if(max_pager_id != "") param.add(new SimpleEntry<String,String>("max_pager_id",max_pager_id));
+			MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get_items",param);
+
+			if(rawres.error) return res;
+			try{
+				JSONObject resjson = new JSONObject(rawres.response);
+				JSONArray datas = resjson.getJSONArray("data");
+				has_next = resjson.getJSONObject("meta").getBoolean("has_next");
+				//1件ずつデータとりだし
+				for(int i = 0; i < datas.length(); i++){
+					JSONObject iteminfo = datas.getJSONObject(i);
+					MercariItem item = new MercariItem(iteminfo);
+					res.add(item);
+					max_pager_id = item.pager_id.toString(); //次のリクエストで使うためにmax_pager_id更新
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+				return res;
+			}
+		}while(has_next == true);
+        return res;
+    }
+	
     //アクセストークンを取得
     private String GetMercariAccessToken(){
         String uuid = UUID.randomUUID().toString();
@@ -190,63 +250,18 @@ public class MercariSearcher{
 				response.append(inputLine);
 			}
 			in.close();
-
-			//print result
-			System.out.println(response.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
         return res;
     }
-
 	
-    //特定のsellerIDの商品をすべて取得
-    //List<Integer> status_option := 商品の状態1:on_sale 2:trading 3:sold_out
-    public List<MercariItem> GetAllItemsWithSellers(String sellerid,List<Integer> status_list){
-		GetItemsOption option = new GetItemsOption();
-		option.sellerid = sellerid;
-		option.status_list = status_list;
-        return GetItems(option);
-    }
-    //コンディションに応じて商品を取得する
-    //一度のリクエストで取れるのは最大で60個 60個を超える場合は複数回APIを叩いて結果を取得する.
-    private List<MercariItem> GetItems(GetItemsOption option){
-        List<SimpleEntry<String,String>> default_param = new ArrayList<SimpleEntry<String,String>>();
-        default_param.add(new SimpleEntry<String,String>("_access_token",this.access_token));
-        default_param.add(new SimpleEntry<String,String>("_global_access_token",this.global_access_token));
-	    default_param.addAll(option.ToPairList());
-		default_param.add(new SimpleEntry<String,String>("limit","60"));
-        //default_param.add(new SimpleEntry<String,String>("pixel_ratio","4.0"));
-        List<MercariItem> res = new ArrayList<MercariItem>();
-
-		//60個以上あるか
-		Boolean has_next = false;
-		//2回目以降でつかうmax_pager_id
-	    String max_pager_id = "";
-		do{
-			List<SimpleEntry<String,String>> param = new ArrayList<SimpleEntry<String,String>>();
-			param.addAll(default_param);
-			 if(max_pager_id != "") param.add(new SimpleEntry<String,String>("max_pager_id",max_pager_id));
-			MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get_items",param);
-
-			if(rawres.error) return res;
-			try{
-				JSONObject resjson = new JSONObject(rawres.response);
-				System.out.println(resjson);
-				JSONArray datas = resjson.getJSONArray("data");
-				has_next = resjson.getJSONObject("meta").getBoolean("has_next");
-				//1件ずつデータとりだし
-				for(int i = 0; i < datas.length(); i++){
-					JSONObject iteminfo = datas.getJSONObject(i);
-					MercariItem item = new MercariItem(iteminfo);
-					res.add(item);
-					max_pager_id = item.pager_id.toString(); //次のリクエストで使うためにmax_pager_id更新
-				}
-			}catch(Exception e){
-				e.printStackTrace();
-				return res;
-			}
-		}while(has_next == true);
-        return res;
-    }
+	//access_tokenとglobal_access_tokenのはいったListを返す関数
+	private List<SimpleEntry<String,String>> GetTokenParamListForMercariAPI(){
+		List<SimpleEntry<String,String>> param = new ArrayList<SimpleEntry<String,String>>();
+        param.add(new SimpleEntry<String,String>("_access_token",this.access_token));
+        param.add(new SimpleEntry<String,String>("_global_access_token",this.global_access_token));
+		return param;
+	}
+	
 }

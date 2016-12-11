@@ -34,7 +34,7 @@ public class MercariItem{
 	public Long updated; //更新日時UNIXタイムスタンプ10桁 たしか売れたら更新される コメントされたらではなさそう？
 	public Long created; //作成日時UNIXタイムスタンプ10桁
 	public Long pager_id; //商品ページのインデックス?,get_itemsで60件以上あるときは最後のitemのpager_idを使って2回目以降叩く
-	public Long item_pv; //なにこれ？？たぶんアクセス数
+	//public Long item_pv; //なにこれ？？たぶんアクセス数
 	public String shipping_from_area; //発送都道府県
 	public ItemCategory category;
 	public List<String> imageurls; //画像URL
@@ -74,7 +74,7 @@ public class MercariItem{
 			this.updated = json.getLong("updated");
 			this.created = json.getLong("created");
 			this.pager_id = json.getLong("pager_id");
-			this.item_pv = json.getLong("item_pv");
+			//this.item_pv = json.getLong("item_pv");
 			this.shipping_from_area = json.getJSONObject("shipping_from_area").getString("name");
 		    this.category = new ItemCategory(json.getJSONObject("item_category"));
 			this.imageurls = new ArrayList<String>();

@@ -48,19 +48,22 @@ public class MercariExhibitter{
 	
 	public MercariExhibitter(String PHPSESSID){
 		cookiestr = "G_ENABLED_IDPS=google; PHPSESSID=" + PHPSESSID;
-		
 	}
-	public void Sell(MercariExhibitItem item){
+	
+	public MercariItem Sell(MercariExhibitItem item){
 		try{
 			/*パラメータの用意*/
 			List<SimpleEntry<String,String>> param = item.toParamList();
 			String csrf = GetCSRFToken();
 			param.add(new SimpleEntry<String,String>("__csrf_value",csrf));
 			/*出品*/
-			SendPostMercariform("https://www.mercari.com/jp/sell/selling/",param);
+			String rst = SendPostMercariform("https://www.mercari.com/jp/sell/selling/",param);
 		}catch(Exception e){
-			
+			e.printStackTrace();
+			System.out.println("出品に失敗しました");
+			return null;
 		}
+		return null;
 	}
 	/*商品出品ページのHTMLからCSRFトークンを取得
 	  毎回同じとは限らないので出品するごとに取得する*/
@@ -86,7 +89,7 @@ public class MercariExhibitter{
 	}
 
 	/*メルカリAPIを使用するのではなくメルカリのWebサイトのフォームのPOSTを行う*/
-	public void SendPostMercariform(String url,List<SimpleEntry<String,String>> param){
+	public String SendPostMercariform(String url,List<SimpleEntry<String,String>> param){
 		try{
 			URL obj = new URL(url);            
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
@@ -124,9 +127,10 @@ public class MercariExhibitter{
 			}
 			in.close();
  
-			System.out.println(response.toString());
+			return response.toString();
 		}catch(Exception e){
 			e.printStackTrace();
+			return null;
 		}
 		
 	}

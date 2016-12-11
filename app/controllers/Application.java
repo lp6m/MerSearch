@@ -23,6 +23,7 @@ public class Application extends Controller {
 		mercariapi = new MercariSearcher();
 		System.out.println(mercariapi.access_token);
 		List<MercariItem> res = mercariapi.GetAllItemsWithSellers(sellerid,new ArrayList<Integer>(Arrays.asList(2,3)));
+		mercariapi.GetItemInfobyItemID("m170271875"); 
 		return ok(searchresult.render(res));
 		
 	}
