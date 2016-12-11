@@ -8,3 +8,4 @@
 ##MercariExhibitter.java
 ログインを要する動作を行う.商品の出品・削除など.
 - Sell
+- Cancel

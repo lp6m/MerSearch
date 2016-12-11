@@ -60,7 +60,7 @@ public class MercariExhibitter{
 			param.add(GetCSRFParam());
 			String res = SendPostMercariform("https://www.mercari.com/jp/sell/selling/",param);
 			/*itemidの取り出し*/
-			JSONObject resjson = new JSONObject(response);
+			JSONObject resjson = new JSONObject(res);
 			String itemid = resjson.getJSONObject("item").getString("id");
 			/*出品したあと出品IDから商品情報をとってきて返す*/
 			MercariSearcher s = new MercariSearcher();
@@ -70,13 +70,17 @@ public class MercariExhibitter{
 			System.out.println("出品に失敗しました");
 			return null;
 		}
-		return null;
 	}
 	/*商品の削除*/
 	public Boolean Cancel(String itemID){
-		SendPostMercariform("https://www.mercari.com/jp/items/cancel/"+itemID,GetCSRFParam());
-		/*TODO:商品ページに実際にアクセスして消えていればOK*/
-		return true;
+		try{
+			SendPostMercariform("https://www.mercari.com/jp/items/cancel/"+itemID,Arrays.asList(GetCSRFParam()));
+			/*TODO:商品ページに実際にアクセスして消えていればOK*/
+			return true;
+		}catch(Exception e){
+			System.out.println("商品の削除に失敗しました");
+			return false;
+		}
 	}
 	public Boolean Cancel(MercariItem item){
 		return Cancel(item.id);
