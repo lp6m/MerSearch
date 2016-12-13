@@ -1,10 +1,25 @@
 @(message: String)
 
 @main("Welcome to Merpicker") {
+	<div>
+	  <p>自動出品する商品の追加-すでに出品している商品の商品ID(mからはじまる)を入力してください.</p><br>
+商品は即時削除され,自動で再出品されます.
+																				  
+        <form action = "/additem" method = "post">
+	  
+	      商品ID: <input type = "text" name = "itemid"><br>
+		  在庫数: <input type="number" name="zaikonum" value="1" min = "1">
+	    <input type = "submit">
+	    </form>
+	</div>
+
+	<div>
+    <p>セラーIDからの商品検索</p>
     <form action = "/searchresult" method = "get">
 	  
 	  <input type = "text" name = "sellerid"><br>
 	  <input type = "submit">
 	</form>
 	
+	</div>
 }
