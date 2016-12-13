@@ -70,15 +70,18 @@ public class MercariSearcher{
 	//特定のitemIDの商品情報を取得
 	//このAPIではコメントなどの情報も取得できるが現時点では取り出していない
 	public MercariItem GetItemInfobyItemID(String itemid){
-		List<SimpleEntry<String,String>> param = GetTokenParamListForMercariAPI();
-		param.add(new SimpleEntry<String,String>("id",itemid));
-		MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get",param);
-		System.out.println(rawres.response);
-		JSONObject resjson = new JSONObject(rawres.response);
-		JSONObject iteminfo = resjson.getJSONObject("data");
-		MercariItem item = new MercariItem(iteminfo);
-		System.out.println(item);
-		return item;
+		try{
+			List<SimpleEntry<String,String>> param = GetTokenParamListForMercariAPI();
+			param.add(new SimpleEntry<String,String>("id",itemid));
+			MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get",param);
+			System.out.println(rawres.response);
+			JSONObject resjson = new JSONObject(rawres.response);
+			JSONObject iteminfo = resjson.getJSONObject("data");
+			MercariItem item = new MercariItem(iteminfo);
+			return item;
+		}catch(Exception e){
+			return null;
+		}
 	}
     //特定のsellerIDの商品をすべて取得
     //List<Integer> status_option := 商品の状態1:on_sale 2:trading 3:sold_out
@@ -207,7 +210,10 @@ public class MercariSearcher{
             
             res.response = response.toString();
             res.error = false;
-        }catch(Exception e){
+        }catch(FileNotFoundException e){
+			//4xx 5xx error
+			e.printStackTrace();
+		}catch(Exception e){
             e.printStackTrace();
             System.out.println("error");
         }
