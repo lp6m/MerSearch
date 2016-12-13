@@ -1,6 +1,6 @@
 package actions;
 
-import models.User;
+import models.BasicAuthUser;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -32,8 +32,8 @@ public class BasicAuthAction extends Action.Simple {
 
         String username = credString[0];
         String password = credString[1];
-        User authUser = User.authenticate(username, password);
-
+        BasicAuthUser authUser = BasicAuthUser.authenticate(username, password);
+		
         return (authUser == null) ? F.Promise.pure((SimpleResult) unauthorized("unauthorized")) : delegate.call(context);
     }
 }
