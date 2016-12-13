@@ -24,7 +24,25 @@ public class MercariExhibitItem{
 	public String image2path = "";
 	public String image3path = "";
 	public String image4path = "";
-	
+
+	public MercariExhibitItem(){
+	}
+	/*MercariItemから出品用のオブジェクトを作成*/
+	public MercariExhibitItem(MercariItem item){
+		this.name = item.name;
+		this.description = item.description;
+		this.category_id = item.category.id.toString();
+		//this.size =
+		//this.brand_name
+		//this.item_condition =
+	    //this.shipping_payer
+		//this.shipping_method
+		this.shipping_from_area = item.shipping_from_area.toString();
+		//this.shipping_duration
+		this.price = item.price.toString();
+		//this.sales_fee
+		//this.
+	}
 	public List<SimpleEntry<String,String>> toParamList(){
 		List<SimpleEntry<String,String>> rst = new ArrayList<SimpleEntry<String,String>>();
 		

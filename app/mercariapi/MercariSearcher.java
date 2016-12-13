@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
 import java.nio.charset.Charset;
 import javax.net.ssl.HttpsURLConnection;
+import java.io.FileNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.net.URLEncoder;
@@ -76,10 +77,11 @@ public class MercariSearcher{
 			MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get",param);
 			System.out.println(rawres.response);
 			JSONObject resjson = new JSONObject(rawres.response);
-			JSONObject iteminfo = resjson.getJSONObject("data");
+		    JSONObject iteminfo = resjson.getJSONObject("data");
 			MercariItem item = new MercariItem(iteminfo);
 			return item;
 		}catch(Exception e){
+			e.printStackTrace();
 			return null;
 		}
 	}
