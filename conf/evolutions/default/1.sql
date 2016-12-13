@@ -9,6 +9,14 @@ create table basic_auth_user (
   constraint pk_basic_auth_user primary key (username))
 ;
 
+create table manage_item (
+  itemid                    varchar(255) not null,
+  username                  varchar(255),
+  ignoreflag                boolean,
+  zaiko                     integer,
+  constraint pk_manage_item primary key (itemid))
+;
+
 create table user (
   username                  varchar(255) not null,
   password                  varchar(255),
@@ -17,6 +25,8 @@ create table user (
 ;
 
 create sequence basic_auth_user_seq;
+
+create sequence manage_item_seq;
 
 create sequence user_seq;
 
@@ -29,11 +39,15 @@ SET REFERENTIAL_INTEGRITY FALSE;
 
 drop table if exists basic_auth_user;
 
+drop table if exists manage_item;
+
 drop table if exists user;
 
 SET REFERENTIAL_INTEGRITY TRUE;
 
 drop sequence if exists basic_auth_user_seq;
+
+drop sequence if exists manage_item_seq;
 
 drop sequence if exists user_seq;
 
