@@ -33,12 +33,11 @@ import org.apache.commons.codec.binary.Base64;
 import java.awt.image.BufferedImage;
 
 public class MercariUtils{
-	/*画像をBase64文字列に変換する*/
-	public static String GetBase64ImageString(String filename){
-		URL imgurl = MercariUtils.class.getClassLoader().getResource(filename);
+	/*URLから画像を取得してBase64文字列に変換する*/
+	public static String GetBase64ImageFromURL(String imageUrl){
+		/*URL imgurl = MercariUtils.class.getClassLoader().getResource(filename);
 		File file = new File(imgurl.getFile());
 		BufferedImage image = null;
-
 		try {
 			image = ImageIO.read(file);
 		} catch (IOException e) {
@@ -55,9 +54,21 @@ public class MercariUtils{
 		} catch (IOException e) {
 			e.printStackTrace();
 			return "";
-		}
-		byte[] imageBytes = baos.toByteArray();
+			}*/
+		byte[] imageBytes = getImageByteArray(imageUrl, "jpg");
 		String imageString = new String(Base64.encodeBase64(imageBytes));
-		return "data:image/jpeg;base64" + imageString;
+		return "data:image/jpeg;base64," + imageString;
+	}
+	/*画像URLから画像を取得する*/
+	static public byte[] getImageByteArray(String imageUrl, String fileNameExtension) {
+		try{
+			URL url = new URL(imageUrl);
+			BufferedImage readImage = ImageIO.read(url);
+			ByteArrayOutputStream outPutStream = new ByteArrayOutputStream();
+			ImageIO.write(readImage, fileNameExtension, outPutStream);
+			return outPutStream.toByteArray();
+		}catch(Exception e){
+			return null;
+		}
 	}
 }
