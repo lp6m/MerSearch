@@ -67,7 +67,36 @@ public class MercariSearcher{
         }
         return rst;
     }
-
+	//最新の手数料のレートに応じて手数料を求める
+	//手数料取得失敗時は負の値が返る
+	public Integer GetSalesFee(Integer price,Integer category_id){
+		try{
+			List<SimpleEntry<String,String>> param = GetTokenParamListForMercariAPI();
+			MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/sales_fee/get",param);
+			JSONObject resjson = new JSONObject(rawres.response);
+			JSONArray sales_cond = resjson.getJSONObject("data").getJSONArray("parameters");
+			/*カテゴリを再優先, 次に金額の条件を満たすか*/
+			for(int i = 0; i < sales_cond.length(); i++){
+				JSONObject cond = sales_cond.getJSONObject(i);
+				/*カテゴリIDの条件があってそれを満たさない場合は次の条件へ*/
+				if(cond.has("category_id") && cond.getInt("category_id") != category_id) continue;
+				/*金額の条件を満たしていれば手数料決定*/
+				Integer min_price = cond.isNull("min_price") ? -1 : cond.getInt("min_price");
+				Integer max_price = cond.isNull("max_price") ? -1 : cond.getInt("max_price");
+				Integer fixed_fee = cond.isNull("fixed_fee") ? 0 : cond.getInt("fixed_fee");
+				if(min_price <= price && price <= max_price){
+					/*手数料計算*/
+					double rate = cond.isNull("rate") ? -1 : cond.getDouble("rate");
+				    Integer fee = (int)Math.floor(rate * price) + fixed_fee;
+					return fee;
+				}
+			}
+			return -1; /*どの条件にもマッチしなかった*/
+		}catch(Exception e){
+			e.printStackTrace();
+			return -1;
+		}
+	}
 	//特定のitemIDの商品情報を取得
 	//このAPIではコメントなどの情報も取得できるが現時点では取り出していない
 	public MercariItem GetItemInfobyItemID(String itemid){
@@ -75,7 +104,7 @@ public class MercariSearcher{
 			List<SimpleEntry<String,String>> param = GetTokenParamListForMercariAPI();
 			param.add(new SimpleEntry<String,String>("id",itemid));
 			MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get",param);
-			System.out.println(rawres.response);
+			//System.out.println(rawres.response);
 			JSONObject resjson = new JSONObject(rawres.response);
 		    JSONObject iteminfo = resjson.getJSONObject("data");
 			MercariItem item = new MercariItem(iteminfo);
