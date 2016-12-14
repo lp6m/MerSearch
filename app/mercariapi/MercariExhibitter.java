@@ -58,6 +58,7 @@ public class MercariExhibitter{
 			/*パラメータの用意*/
 			List<SimpleEntry<String,String>> param = item.toParamList();
 			param.add(GetCSRFParam());
+			param.add(GetExhibitParam());
 			String res = SendPostMercariform("https://www.mercari.com/jp/sell/selling/",param);
 			/*itemidの取り出し*/
 			JSONObject resjson = new JSONObject(res);
@@ -100,15 +101,41 @@ public class MercariExhibitter{
 		while ((line= in.readLine()) != null) 
             response.append(line+"\n");
 		in.close();
-		Pattern csrf_pattern = Pattern.compile("App.setCsrfToken\\(\'([^<]+)\'\\)",Pattern.CASE_INSENSITIVE);
+		//Pattern csrf_pattern = Pattern.compile("App.setCsrfToken\\(\'([^<]+)\'\\)",Pattern.CASE_INSENSITIVE);
+	    Pattern csrf_pattern = Pattern.compile("}, '([^<]+)', '",Pattern.CASE_INSENSITIVE); 
 		Matcher matcher1 = csrf_pattern.matcher(response.toString());
 		if(matcher1.find() ) {
-			String rst = matcher1.group(1);
+			String rst = matcher1.group(0);
 			return new SimpleEntry<String,String>("__csrf_value",rst);
 		}
 		return null;
 	}
+	
+	/*商品出品ページのHTMLからexhibitトークンを取得してSimpleEntryを返す
+	  毎回同じとは限らないので出品するごとに取得する*/
+	private SimpleEntry<String,String> GetExhibitParam() throws Exception {
+		URL url = new URL("https://www.mercari.com/jp/sell/");
+		URLConnection conn = url.openConnection();
+		conn.setRequestProperty("cookie",this.cookiestr);
+		String charset = Arrays.asList(conn.getContentType().split(";") ).get(1);
+		String encoding = Arrays.asList(charset.split("=") ).get(1);
 
+		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), encoding )); 
+		StringBuffer response = new StringBuffer();
+		String line;
+		while ((line= in.readLine()) != null) 
+            response.append(line+"\n");
+		in.close();
+		//Pattern csrf_pattern = Pattern.compile("App.setCsrfToken\\(\'([^<]+)\'\\)",Pattern.CASE_INSENSITIVE);
+		Pattern csrf_pattern = Pattern.compile("', '([^<]+)'\\);",Pattern.CASE_INSENSITIVE);
+		Matcher matcher1 = csrf_pattern.matcher(response.toString());
+		if(matcher1.find() ) {
+			String rst = matcher1.group(0);
+			return new SimpleEntry<String,String>("exhibit_token",rst);
+		}
+		return null;
+	}
+	
 	/*メルカリAPIを使用するのではなくメルカリのWebサイトのフォームのPOSTを行う*/
 	public String SendPostMercariform(String url,List<SimpleEntry<String,String>> param){
 		try{
@@ -129,6 +156,7 @@ public class MercariExhibitter{
 				String v = URLEncoder.encode(p.getValue().toString(),"UTF-8");
                 paramstr.add(k + "=" + v);
             }
+			System.out.println("unko");
             urlParameters = String.join("&",paramstr);
             System.out.println(urlParameters);
 			//POST送信
