@@ -20,28 +20,32 @@ public class MercariExhibitItem{
 	public String shipping_duration = "";
 	public String price = "";
 	public String sales_fee = "";
-	public String image1path = "";
-	public String image2path = "";
-	public String image3path = "";
-	public String image4path = "";
+	public String[] imageurls = new String[4];
 
 	public MercariExhibitItem(){
 	}
 	/*MercariItemから出品用のオブジェクトを作成*/
 	public MercariExhibitItem(MercariItem item){
-		this.name = item.name;
-		this.description = item.description;
-		this.category_id = item.category.id.toString();
-		//this.size =
-		//this.brand_name
-		//this.item_condition =
-	    //this.shipping_payer
-		//this.shipping_method
-		this.shipping_from_area = item.shipping_from_area.toString();
-		//this.shipping_duration
-		this.price = item.price.toString();
-		//this.sales_fee
-		//this.
+		try{
+			this.name = item.name;
+			this.description = item.description;
+			this.category_id = item.category.id.toString();
+			this.size = (item.size == null ? "" : item.size.toString());
+			this.brand_name = (item.brand_name == null ? "" : item.size.toString());
+			this.item_condition = item.item_condition.toString();
+			this.shipping_payer = item.shipping_payer.toString();
+			this.shipping_method = item.shipping_method.toString();
+			this.shipping_from_area = item.shipping_from_area.toString(); 
+			this.shipping_duration = item.shipping_duration.toString();
+			this.price = item.price.toString();
+			MercariSearcher s = new MercariSearcher();
+			Integer fee = s.GetSalesFee(item.price, item.category.id);
+			this.sales_fee = fee.toString();
+			for(int i = 0; i < this.imageurls.length; i++) this.imageurls[i] = item.imageurls[i];
+		}catch(Exception e){
+			/*手数料計算失敗した場合や,size,brand_name以外の必須項目がnullになっていた場合は例外発生する*/
+			System.out.println("MercariItemからMercariExhibitItemへの変換に失敗");
+		}
 	}
 	public List<SimpleEntry<String,String>> toParamList(){
 		List<SimpleEntry<String,String>> rst = new ArrayList<SimpleEntry<String,String>>();
@@ -58,19 +62,15 @@ public class MercariExhibitItem{
 		rst.add(new SimpleEntry<String,String>("shipping_duration",shipping_duration));
 		rst.add(new SimpleEntry<String,String>("price",price));
 		rst.add(new SimpleEntry<String,String>("sales_fee",sales_fee));
-		String image1str, image2str, image3str, image4str;
-		if(image1path != "") image1str = MercariUtils.GetBase64ImageString(image1path);
-		else image1str = "";
-		if(image2path != "") image2str = MercariUtils.GetBase64ImageString(image2path);
-		else image2str = "";
-		if(image3path != "") image3str = MercariUtils.GetBase64ImageString(image3path);
-		else image3str = "";
-		if(image4path != "") image4str = MercariUtils.GetBase64ImageString(image4path);
-		else image4str = "";
-		rst.add(new SimpleEntry<String,String>("image1",image1str));
-		rst.add(new SimpleEntry<String,String>("image2",image2str)); 
-		rst.add(new SimpleEntry<String,String>("image3",image3str));
-		rst.add(new SimpleEntry<String,String>("image4",image4str));
+		String[] imagestr = new String[4];
+		for(int i = 0; i < this.imageurls.length; i++){
+			if(imageurls[i] != "") imagestr[i] = MercariUtils.GetBase64ImageFromURL(imageurls[i]);
+			else imagestr[i] = "";
+		}
+		rst.add(new SimpleEntry<String,String>("image1",imagestr[0]));
+		rst.add(new SimpleEntry<String,String>("image2",imagestr[1])); 
+		rst.add(new SimpleEntry<String,String>("image3",imagestr[2]));
+		rst.add(new SimpleEntry<String,String>("image4",imagestr[3]));
 		return rst;
 	}
 }
