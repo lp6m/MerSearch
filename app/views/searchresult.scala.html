@@ -11,7 +11,7 @@
 	  </tr>
 	  @for(item <- items){
 		<tr>
-		  <td><img src = @item.imageurls.get(0) width = "100" height = "100"> </td>
+		  <td><img src = @item.imageurls(0) width = "100" height = "100"> </td>
 		 <td> @item.id </td>
 		 <td> @item.name </td>
 		 <td> @item.price </td>

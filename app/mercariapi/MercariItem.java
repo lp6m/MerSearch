@@ -37,7 +37,7 @@ public class MercariItem{
 	//public Long item_pv; //なにこれ？？たぶんアクセス数
 	public Integer shipping_from_area; //発送都道府県
 	public ItemCategory category;
-	public List<String> imageurls; //画像URL
+	public String[] imageurls = new String[4]; //画像URL
 
 	/*出品用に必要な属性*/
 	/*以下の属性はDetailをとったとき以外はnullになるので注意
@@ -88,10 +88,11 @@ public class MercariItem{
 			//this.item_pv = json.getLong("item_pv");
 			this.shipping_from_area = json.getJSONObject("shipping_from_area").getInt("id");
 		    this.category = new ItemCategory(json.getJSONObject("item_category"));
-			this.imageurls = new ArrayList<String>();
+			this.imageurls = new String[4];
 			JSONArray photos = json.getJSONArray("photos");
-			for(int i = 0; i < photos.length(); i++){
-				this.imageurls.add(photos.getString(i));
+			for(int i = 0; i < this.imageurls.length; i++) this.imageurls[i] = "";
+			for(int i = 0; i < Math.min(this.imageurls.length, photos.length()); i++){
+				this.imageurls[i] = (photos.getString(i));
 			}
 
 			this.size = getIntOrNull(getJSONObjectOrNull(json,"item_size"),"id");
