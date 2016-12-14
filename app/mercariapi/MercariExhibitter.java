@@ -75,7 +75,7 @@ public class MercariExhibitter{
 	/*商品の削除*/
 	public Boolean Cancel(String itemID){
 		try{
-			SendPostMercariform("https://www.mercari.com/jp/items/cancel/"+itemID,Arrays.asList(GetCSRFParam()));
+			SendPostMercariform("https://www.mercari.com/jp/items/cancel/" + itemID + "/",Arrays.asList(GetCSRFParam()));
 			/*TODO:商品ページに実際にアクセスして消えていればOK*/
 			return true;
 		}catch(Exception e){
@@ -105,7 +105,7 @@ public class MercariExhibitter{
 	    Pattern csrf_pattern = Pattern.compile("}, '([^<]+)', '",Pattern.CASE_INSENSITIVE); 
 		Matcher matcher1 = csrf_pattern.matcher(response.toString());
 		if(matcher1.find() ) {
-			String rst = matcher1.group(0);
+			String rst = matcher1.group(1);
 			return new SimpleEntry<String,String>("__csrf_value",rst);
 		}
 		return null;
@@ -130,7 +130,7 @@ public class MercariExhibitter{
 		Pattern csrf_pattern = Pattern.compile("', '([^<]+)'\\);",Pattern.CASE_INSENSITIVE);
 		Matcher matcher1 = csrf_pattern.matcher(response.toString());
 		if(matcher1.find() ) {
-			String rst = matcher1.group(0);
+			String rst = matcher1.group(1);
 			return new SimpleEntry<String,String>("exhibit_token",rst);
 		}
 		return null;
@@ -152,9 +152,9 @@ public class MercariExhibitter{
 			String urlParameters = "";
 			List<String> paramstr = new ArrayList<String>();
             for (SimpleEntry p:param) {
-				String k = URLEncoder.encode(p.getKey().toString(),"UTF-8");
+			    String k = URLEncoder.encode(p.getKey().toString(),"UTF-8");
 				String v = URLEncoder.encode(p.getValue().toString(),"UTF-8");
-                paramstr.add(k + "=" + v);
+				paramstr.add(k + "=" + v);
             }
 			System.out.println("unko");
             urlParameters = String.join("&",paramstr);
