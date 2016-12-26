@@ -140,5 +140,22 @@ public class Application extends Controller {
 		List<ManageItem> items = ManageItem.find.all();
 		return ok(manage.render(items));
 	}
+
+	//管理データベースの商品情報を更新する
+	@With(BasicAuthAction.class)
+	public static  Result updateManageInfo(){
+		//POSTのみ
+		try{
+			List<ManageItem> items = ManageItem.find.all();
+			MercariSearcher ms = new MercariSearcher();
+			for(ManageItem manageitem : items){
+				manageitem.item = ms.GetItemInfobyItemID(manageitem.itemid);
+				manageitem.update();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return redirect("/manage");
+	}
 }
 	
