@@ -36,7 +36,7 @@ public class Application extends Controller {
 	@With(BasicAuthAction.class)
 	public static Result createuser(){
 		/*adminでないとindexに送り返す*/
-		if(!session("username").equals("admin")) return redirect("/");
+		if(session("username") == null || !session("username").equals("admin")) return redirect("/");
 		if("GET".equals(request().method())){
 			//GET 画面表示
 			Form<User> f = new Form<User>(User.class);
@@ -55,7 +55,7 @@ public class Application extends Controller {
 			return redirect("/");
 		}
 	}
-
+	
 	@With(BasicAuthAction.class)
 	public static Result login(){/*ログインページを表示するだけ*/
         return ok(login.render("login"));
@@ -133,6 +133,12 @@ public class Application extends Controller {
 		}catch(Exception e){
 			return redirect("/");
 		}
+	}
+
+	@With(BasicAuthAction.class)
+	public static Result managepage(){
+		List<ManageItem> items = ManageItem.find.all();
+		return ok(manage.render(items));
 	}
 }
 	
