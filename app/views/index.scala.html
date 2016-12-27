@@ -1,4 +1,5 @@
 @(message: String)
+@(ManageList: List[ManageItem])
 
 @main("Welcome to Merpicker") {
     <p>@message</p>
@@ -9,12 +10,42 @@
         <form action = "/additem" method = "post">
 	  
 	      商品ID: <input type = "text" name = "itemid"><br>
-		  在庫数: <input type="number" name="zaikonum" value="1" min = "1">
+		  在庫数: <input type="number" name="zaikonum" value="1" min = "1"><br>
+		  <input type="checkbox" name="deleteflag" value="1" checked="checked">商品を即時削除する<br>
+		  <input type="checkbox" name="adddataflag" value="1" checked="checked">出品したデータを定期管理データベースに追加
 	    <input type = "submit">
 	    </form>
 	</div>
-
+	<hr>
+	<p>商品管理</p>
 	<div>
+	  <form action = "/updateManageInfo" method = "post">
+		<input value = "情報更新" type = "submit">
+      </form>
+      <br>
+      <table border = "1" class="table table-hover">
+		<tr>
+		  <th> 商品ID </th>
+		  <th> 商品画像 </th>
+		  <th> 商品タイトル </th>
+		  <th> いいね数 </th>
+		  <th> コメント数</th>
+		  <th> 出品日時 </th>
+		</tr>
+		@for(t <- ManageList){
+				  <tr>
+					<td> @t.itemid </td>
+					<td> <img src = @t.item.imageurls(0) width = "100" height = "100"> </td>
+					<td> @t.item.name </td>
+					<td> @t.item.num_likes </td>
+					<td> @t.item.num_comments </td>
+					<td> @t.item.created_str </td>
+				  </tr>	
+				  }
+	  </table>
+	<hr>
+	</div>
+	<div>  
     <p>セラーIDからの商品検索</p>
     <form action = "/searchresult" method = "get">
 	  

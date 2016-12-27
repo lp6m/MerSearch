@@ -13,9 +13,10 @@ import models.*;
 public class Application extends Controller {
 	public static MercariSearcher mercariapi;
 
-	@With(BasicAuthAction.class)
+	//@With(BasicAuthAction.class)
     public static Result index() {
 		String pop_message = session("message") == null ? "" : session("message");
+		List<ManageItem> items = ManageItem.find.all();
 	    return ok(index.render(pop_message));
     }
 	public static class SearchForm{
@@ -135,12 +136,6 @@ public class Application extends Controller {
 		}
 	}
 
-	@With(BasicAuthAction.class)
-	public static Result managepage(){
-		List<ManageItem> items = ManageItem.find.all();
-		return ok(manage.render(items));
-	}
-
 	//管理データベースの商品情報を更新する
 	@With(BasicAuthAction.class)
 	public static  Result updateManageInfo(){
@@ -155,7 +150,7 @@ public class Application extends Controller {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return redirect("/manage");
+		return redirect("/index");
 	}
 }
 	
