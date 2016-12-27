@@ -17,7 +17,7 @@ public class Application extends Controller {
     public static Result index() {
 		String pop_message = session("message") == null ? "" : session("message");
 		List<ManageItem> items = ManageItem.find.all();
-	    return ok(index.render(pop_message));
+	    return ok(index.render(pop_message, items));
     }
 	public static class SearchForm{
 		public String sellerid;
@@ -53,8 +53,8 @@ public class Application extends Controller {
 			user.password = password;
 			user.phpssid = phpssid;
 			user.save();
-			return redirect("/");
 		}
+		return redirect("/");
 	}
 	
 	@With(BasicAuthAction.class)
@@ -102,9 +102,9 @@ public class Application extends Controller {
 			MercariItem item = s.GetItemInfobyItemID(itemid);
 			if(item != null){
 				String warnstr = "";
+				MercariExhibitter me = new MercariExhibitter(session("phpssid"));
 				/*まずその商品を即時削除する.*/
 				if(deleteflag){
-					MercariExhibitter me = new MercariExhibitter(session("phpssid"));
 					Boolean cancel_rst = me.Cancel(itemid);
 					if(cancel_rst == false){ /*他人の商品の場合は削除に失敗する(はず)*/
 						warnstr = "警告: 商品の削除に失敗（他人の商品？）";
@@ -160,6 +160,19 @@ public class Application extends Controller {
 			e.printStackTrace();
 		}
 		return redirect("/index");
+	}
+
+	/*商品管理データベースから当該商品を削除*/
+	@With(BasicAuthAction.class)
+	public static Result deleteManageItem(String itemid){
+		try{
+			ManageItem item = ManageItem.find.where().eq("itemid",itemid).findList().get(0);
+			item.delete();
+			session("message","DBから商品を削除しました : " + itemid);
+		}catch(Exception e){
+			session("message","DBから商品を削除するのに失敗しました");
+		}
+		return redirect("/");
 	}
 }
 	

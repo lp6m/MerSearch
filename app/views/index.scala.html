@@ -1,5 +1,4 @@
-@(message: String)
-@(ManageList: List[ManageItem])
+@(message: String, ManageList: List[ManageItem])
 
 @main("Welcome to Merpicker") {
     <p>@message</p>
@@ -32,6 +31,7 @@
 		  <th> コメント数</th>
 		  <th> 在庫数 </th>
 		  <th> 出品日時 </th>
+		  <th> </th>
 		</tr>
 		@for(t <- ManageList){
 				  <tr>
@@ -42,6 +42,11 @@
 					<td> @t.item.num_comments </td>
 					<td> @t.zaiko </td>
 					<td> @t.item.created_str </td>
+					<td>
+					  <form action = "/deleteManageItem/" + @t.itemid method = "get">
+						<input value = "DBから削除" type = "submit">
+					  </form>
+					</td>
 				  </tr>	
 				  }
 	  </table>
