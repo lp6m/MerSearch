@@ -22,7 +22,7 @@ import org.json.JSONObject;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 
-public class MercariItem{
+public class MercariItem implements Cloneable{
 	public String id;
 	public MercariSeller seller;
 	public String status; //on_sale trading sold_out
@@ -53,7 +53,7 @@ public class MercariItem{
 	public String updated_str; //Unixタイムスタンプを変換したもの
 	public String created_str;
 	
-	public class ItemCategory{
+	public class ItemCategory implements Cloneable{
 		public Integer id;
 		public String name; //フィルム
 		public Integer display_order; //なにこれ
@@ -70,8 +70,15 @@ public class MercariItem{
 			this.root_category_id = getIntOrNull(json,"root_category_id");
 			this.root_category_name = getStringOrNull(json, "root_category_name");
 		}
+		public ItemCategory clone() throws CloneNotSupportedException{
+			return (ItemCategory)super.clone();
+		}
 	}
-	
+	public MercariItem clone() throws CloneNotSupportedException{
+		MercariItem cloned = (MercariItem)super.clone();
+		cloned.category = (ItemCategory)category.clone();
+		return cloned;
+	}
 	public MercariItem(JSONObject json){
 		try{
 			this.id = getStringOrNull(json, "id");
