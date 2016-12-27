@@ -22,6 +22,9 @@ import org.json.JSONObject;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class MercariItem implements Cloneable{
 	public String id;
 	public MercariSeller seller;
@@ -36,7 +39,6 @@ public class MercariItem implements Cloneable{
 	public Long pager_id; //商品ページのインデックス?,get_itemsで60件以上あるときは最後のitemのpager_idを使って2回目以降叩く
 	//public Long item_pv; //なにこれ？？たぶんアクセス数
 	public Integer shipping_from_area; //発送都道府県
-	public ItemCategory category;
 	public String[] imageurls = new String[4]; //画像URL
 
 	/*出品用に必要な属性*/
@@ -52,32 +54,31 @@ public class MercariItem implements Cloneable{
 	
 	public String updated_str; //Unixタイムスタンプを変換したもの
 	public String created_str;
+	 
+	public Integer category_id;
+	public String category_name; //フィルム
+	public Integer category_display_order; //なにこれ
+	public Integer category_parent_category_id;
+	public String category_parent_category_name;//スマホアクセサリー
+	public Integer category_root_category_id;
+	public String category_root_category_name; //家電・スマホ・カメラ
 	
-	public class ItemCategory implements Cloneable{
-		public Integer id;
-		public String name; //フィルム
-		public Integer display_order; //なにこれ
-		public Integer parent_category_id;
-		public String parent_category_name;//スマホアクセサリー
-		public Integer root_category_id;
-		public String root_category_name; //家電・スマホ・カメラ
-		public ItemCategory(JSONObject json){
-			this.id = getIntOrNull(json,"id");
-			this.name = getStringOrNull(json, "name");
-			this.display_order = getIntOrNull(json,"display_order");
-			this.parent_category_id = getIntOrNull(json,"parent_category_id");
-			this.parent_category_name = getStringOrNull(json, "parent_category_name");
-			this.root_category_id = getIntOrNull(json,"root_category_id");
-			this.root_category_name = getStringOrNull(json, "root_category_name");
-		}
-		public ItemCategory clone() throws CloneNotSupportedException{
-			return (ItemCategory)super.clone();
-		}
-	}
 	public MercariItem clone() throws CloneNotSupportedException{
 		MercariItem cloned = (MercariItem)super.clone();
-		cloned.category = (ItemCategory)category.clone();
 		return cloned;
+	}
+
+	public String toJSON(){
+		try{
+			ObjectMapper mapper = new ObjectMapper();
+			String json = mapper.writeValueAsString(this);
+			return json;
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public MercariItem(){
 	}
 	public MercariItem(JSONObject json){
 		try{
@@ -94,7 +95,17 @@ public class MercariItem implements Cloneable{
 			this.pager_id = getLongOrNull(json,"pager_id");
 			//this.item_pv = json.getLong("item_pv");
 			this.shipping_from_area = json.getJSONObject("shipping_from_area").getInt("id");
-		    this.category = new ItemCategory(json.getJSONObject("item_category"));
+		    //this.category = new ItemCategory(json.getJSONObject("item_category"));
+			/*カテゴリ*/
+			JSONObject categoryObject = json.getJSONObject("item_category");
+			this.category_id = getIntOrNull(categoryObject, "id");
+			this.category_name = getStringOrNull(categoryObject, "name");
+			this.category_display_order = getIntOrNull(categoryObject, "display_order");
+			this.category_parent_category_id = getIntOrNull(categoryObject, "parent_category_id");
+			this.category_parent_category_name = getStringOrNull(categoryObject, "parent_category_name");
+			this.category_root_category_id = getIntOrNull(categoryObject, "root_category_id");
+			this.category_root_category_name = getStringOrNull(categoryObject, "root_category_name");
+	
 			this.imageurls = new String[4];
 			JSONArray photos = json.getJSONArray("photos");
 			for(int i = 0; i < this.imageurls.length; i++) this.imageurls[i] = "";
@@ -108,6 +119,8 @@ public class MercariItem implements Cloneable{
 			this.shipping_payer = getIntOrNull(getJSONObjectOrNull(json,"shipping_payer"),"id");
 			this.shipping_method = getIntOrNull(getJSONObjectOrNull(json,"shipping_method"),"id");
 			this.shipping_duration = getIntOrNull(getJSONObjectOrNull(json,"shipping_duration"),"id");
+
+			
 
 			Date updated_date = new Date(this.updated * 1000);
 			Date created_date = new Date(this.created * 1000);

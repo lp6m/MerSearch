@@ -29,7 +29,7 @@ public class MercariExhibitItem{
 		try{
 			this.name = item.name;
 			this.description = item.description;
-			this.category_id = item.category.id.toString();
+			this.category_id = item.category_id.toString();
 			this.size = (item.size == null ? "" : item.size.toString());
 			this.brand_name = (item.brand_name == null ? "" : item.size.toString());
 			this.item_condition = item.item_condition.toString();
@@ -39,7 +39,7 @@ public class MercariExhibitItem{
 			this.shipping_duration = item.shipping_duration.toString();
 			this.price = item.price.toString();
 			MercariSearcher s = new MercariSearcher();
-			Integer fee = s.GetSalesFee(item.price, item.category.id);
+			Integer fee = s.GetSalesFee(item.price, item.category_id);
 			this.sales_fee = fee.toString();
 			for(int i = 0; i < this.imageurls.length; i++) this.imageurls[i] = item.imageurls[i];
 		}catch(Exception e){
