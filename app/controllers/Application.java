@@ -10,6 +10,7 @@ import java.util.*;
 import views.html.*;
 import actions.*;
 import models.*;
+
 public class Application extends Controller {
 	public static MercariSearcher mercariapi;
 
@@ -17,6 +18,8 @@ public class Application extends Controller {
     public static Result index() {
 		String pop_message = session("message") == null ? "" : session("message");
 		List<ManageItem> items = ManageItem.find.all();
+		for(ManageItem item : items) item.updateMercariItemforView();
+		
 	    return ok(index.render(pop_message, items));
     }
 	public static class SearchForm{
@@ -92,8 +95,8 @@ public class Application extends Controller {
 			Map<String,String[]> f = request().body().asFormUrlEncoded();
 			String itemid = f.get("itemid")[0];
 			Integer zaikonum = Integer.parseInt(f.get("zaikonum")[0]);
-			Boolean deleteflag = f.get("deleteflag")[0].equals("true");
-			Boolean addflag = f.get("addflag")[0].equals("true");
+			Boolean deleteflag = f.get("deleteflag")[0].equals("1");
+			Boolean addflag = f.get("adddataflag")[0].equals("1");
 			System.out.println("deleteflag: " + Boolean.toString(deleteflag));
 			System.out.println("addflag: " + Boolean.toString(addflag));
 			
@@ -111,16 +114,15 @@ public class Application extends Controller {
 					}
 				}
 				/*即時商品の出品*/
-				MercariExhibitItem new_item = new MercariExhibitItem(item);
-				me.Sell(new_item);
+				MercariExhibitItem sell_item = new MercariExhibitItem(item);
+				MercariItem new_item = me.Sell(sell_item);
 				if(addflag){
 					/*商品を管理データベースに追加する*/
-					ManageItem manageitem = new ManageItem();
-					manageitem.itemid = itemid;
-					manageitem.item = item;
-					manageitem.username = session("username");
-					manageitem.zaiko = zaikonum;
-					manageitem.ignoreflag = false;
+					ManageItem manageitem = new ManageItem(new_item.id,
+														   session("username"),
+														   new_item.toJSON(),
+														   false,
+														   zaikonum);
 					manageitem.save();
 				}
 				session("message","商品を追加しました" + warnstr);
@@ -131,6 +133,7 @@ public class Application extends Controller {
 				return redirect("/");
 			}
 		}catch(Exception e){
+			e.printStackTrace();
 			session("message","商品の追加に失敗しました");
 			return redirect("/");
 		}
@@ -153,7 +156,7 @@ public class Application extends Controller {
 			List<ManageItem> items = ManageItem.find.all();
 			MercariSearcher ms = new MercariSearcher();
 			for(ManageItem manageitem : items){
-				manageitem.item = ms.GetItemInfobyItemID(manageitem.itemid);
+				manageitem.itemjson = ms.GetItemInfobyItemID(manageitem.itemid).toJSON();
 				manageitem.update();
 			}
 		}catch(Exception e){

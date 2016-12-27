@@ -12,6 +12,7 @@ create table basic_auth_user (
 create table manage_item (
   itemid                    varchar(255) not null,
   username                  varchar(255),
+  itemjson                  TEXT,
   ignoreflag                boolean,
   zaiko                     integer,
   constraint pk_manage_item primary key (itemid))

@@ -16,3 +16,4 @@ dist
 *.db
 /*.db
 /secret/*
+.log

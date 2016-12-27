@@ -23,11 +23,17 @@ import java.util.Calendar;
 import java.text.SimpleDateFormat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+//import net.arnx.jsonic.JSON;
+//import net.arnx.jsonic.JSONHint;
 
 public class MercariItem implements Cloneable{
+	//@JSONHint(ignore = true)	
+	@JsonIgnore
+	public MercariSeller seller; //JSON -> Objectへの変換がうまくいかないのでignore
+	
 	public String id;
-	public MercariSeller seller;
 	public String status; //on_sale trading sold_out
 	public String name; //商品タイトル
 	public Integer price;
@@ -72,6 +78,8 @@ public class MercariItem implements Cloneable{
 		try{
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(this);
+			//String json = JSON.encode(this);
+			System.out.println(json);
 			return json;
 		}catch(Exception e){
 			e.printStackTrace();

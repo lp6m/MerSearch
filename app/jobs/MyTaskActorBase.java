@@ -24,8 +24,8 @@ public class MyTaskActorBase{
 	}
 
 	public void start(){
-		cancellable = system.scheduler().schedule(Duration.Zero(),
-												  Duration.create(1, TimeUnit.MINUTES),
+		cancellable = system.scheduler().schedule(Duration.create(10, TimeUnit.MINUTES),
+												  Duration.create(60, TimeUnit.MINUTES),
 												  myTaskActor,
 												  "reexhibit",
 												  system.dispatcher(), null);
