@@ -26,7 +26,17 @@ public class ManageItem extends Model{
 
 	@Required
 	public Integer zaiko;
-	
+
+	public ManageItem(){
+		
+	}
+	public ManageItem(String itemid, String username, MercariItem item, Boolean ignoreflag, Integer zaiko){
+		this.itemid = itemid;
+		this.username = username;
+		this.item = item;
+		this.ignoreflag = ignoreflag;
+		this.zaiko = zaiko;
+	}
     public static Finder<String, ManageItem> find = new Finder<String, ManageItem>(String.class, ManageItem.class);
 
 }

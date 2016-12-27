@@ -47,11 +47,18 @@ public class MercariExhibitter{
 	static private String accept_encoding = "UTF-8";
 	static private String accept = "application/json";
 	static private String user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.100 Safari/537.36";
-	
+
+    
 	public MercariExhibitter(String PHPSESSID){
 		cookiestr = "G_ENABLED_IDPS=google; PHPSESSID=" + PHPSESSID;
 	}
 	
+	/*商品の削除と再出品を行う*/
+	public MercariItem SellandCancel(MercariItem item){
+		MercariExhibitItem new_item = new MercariExhibitItem(item);
+		Cancel(item);
+		return Sell(new_item);
+	}
 	/*商品の出品 商品情報を返す*/
 	public MercariItem Sell(MercariExhibitItem item){
 		try{

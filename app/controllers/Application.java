@@ -13,7 +13,7 @@ import models.*;
 public class Application extends Controller {
 	public static MercariSearcher mercariapi;
 
-	//@With(BasicAuthAction.class)
+	@With(BasicAuthAction.class)
     public static Result index() {
 		String pop_message = session("message") == null ? "" : session("message");
 		List<ManageItem> items = ManageItem.find.all();

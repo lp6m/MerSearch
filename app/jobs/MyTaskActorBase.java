@@ -27,7 +27,7 @@ public class MyTaskActorBase{
 		cancellable = system.scheduler().schedule(Duration.Zero(),
 												  Duration.create(1, TimeUnit.MINUTES),
 												  myTaskActor,
-												  "Call",
+												  "reexhibit",
 												  system.dispatcher(), null);
 	
 	}
