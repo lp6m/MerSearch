@@ -92,28 +92,37 @@ public class Application extends Controller {
 			Map<String,String[]> f = request().body().asFormUrlEncoded();
 			String itemid = f.get("itemid")[0];
 			Integer zaikonum = Integer.parseInt(f.get("zaikonum")[0]);
+			Boolean deleteflag = f.get("deleteflag")[0].equals("true");
+			Boolean addflag = f.get("addflag")[0].equals("true");
+			System.out.println("deleteflag: " + Boolean.toString(deleteflag));
+			System.out.println("addflag: " + Boolean.toString(addflag));
+			
 			/*商品IDから商品の情報を検索*/
 			MercariSearcher s = new MercariSearcher();
 			MercariItem item = s.GetItemInfobyItemID(itemid);
 			if(item != null){
 				String warnstr = "";
 				/*まずその商品を即時削除する.*/
-				MercariExhibitter me = new MercariExhibitter(session("phpssid"));
-				Boolean cancel_rst = me.Cancel(itemid);
-				if(cancel_rst == false){ /*他人の商品の場合は削除に失敗する(はず)*/
-					warnstr = "警告: 商品の削除に失敗（他人の商品？）";
+				if(deleteflag){
+					MercariExhibitter me = new MercariExhibitter(session("phpssid"));
+					Boolean cancel_rst = me.Cancel(itemid);
+					if(cancel_rst == false){ /*他人の商品の場合は削除に失敗する(はず)*/
+						warnstr = "警告: 商品の削除に失敗（他人の商品？）";
+					}
 				}
 				/*即時商品の出品*/
 				MercariExhibitItem new_item = new MercariExhibitItem(item);
 				me.Sell(new_item);
-				/*商品を管理データベースに追加する*/
-				ManageItem manageitem = new ManageItem();
-				manageitem.itemid = itemid;
-				manageitem.item = item;
-				manageitem.username = session("username");
-				manageitem.zaiko = zaikonum;
-				manageitem.ignoreflag = false;
-				manageitem.save();
+				if(addflag){
+					/*商品を管理データベースに追加する*/
+					ManageItem manageitem = new ManageItem();
+					manageitem.itemid = itemid;
+					manageitem.item = item;
+					manageitem.username = session("username");
+					manageitem.zaiko = zaikonum;
+					manageitem.ignoreflag = false;
+					manageitem.save();
+				}
 				session("message","商品を追加しました" + warnstr);
 				return redirect("/");
 			}else{

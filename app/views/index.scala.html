@@ -30,6 +30,7 @@
 		  <th> 商品タイトル </th>
 		  <th> いいね数 </th>
 		  <th> コメント数</th>
+		  <th> 在庫数 </th>
 		  <th> 出品日時 </th>
 		</tr>
 		@for(t <- ManageList){
@@ -39,6 +40,7 @@
 					<td> @t.item.name </td>
 					<td> @t.item.num_likes </td>
 					<td> @t.item.num_comments </td>
+					<td> @t.zaiko </td>
 					<td> @t.item.created_str </td>
 				  </tr>	
 				  }
