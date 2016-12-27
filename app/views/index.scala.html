@@ -43,7 +43,7 @@
 					<td> @t.zaiko </td>
 					<td> @t.item_forview.created_str </td>
 					<td>
-					  <form action = "/deleteManageItem/" + @t.itemid method = "get">
+					  <form action = @{"/deleteManageItem/" + t.itemid} method = "get">
 						<input value = "DBから削除" type = "submit">
 					  </form>
 					</td>
