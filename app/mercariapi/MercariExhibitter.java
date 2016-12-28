@@ -163,7 +163,6 @@ public class MercariExhibitter{
 				String v = URLEncoder.encode(p.getValue().toString(),"UTF-8");
 				paramstr.add(k + "=" + v);
             }
-			System.out.println("unko");
             urlParameters = String.join("&",paramstr);
             System.out.println(urlParameters);
 			//POST送信
@@ -188,6 +187,5 @@ public class MercariExhibitter{
 			e.printStackTrace();
 			return null;
 		}
-		
 	}
 }

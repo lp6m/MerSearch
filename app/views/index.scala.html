@@ -43,12 +43,12 @@
 		@for(t <- ManageList){
 				  <tr>
 					<td> <a href= @{"https://www.mercari.com/jp/items/" + t.itemid} target="_blank"> @t.itemid </a></td>
-					<td> <img src = @t.item_forview.imageurls(0) width = "100" height = "100"> </td> 
-					<td> @t.item_forview.name </td>
-					<td> @t.item_forview.num_likes </td>
-					<td> @t.item_forview.num_comments </td>
+					<td> <img src = @t.item.imageurls(0) width = "100" height = "100"> </td> 
+					<td> @t.item.name </td>
+					<td> @t.item.num_likes </td>
+					<td> @t.item.num_comments </td>
 					<td> @t.zaiko </td>
-					<td> @t.item_forview.created_str </td>
+					<td> @t.item.created_str </td>
 					<td>
 					  <form action = @{"/deleteManageItem/" + t.itemid} method = "get">
 						<input value = "DBから削除" type = "submit">

@@ -2,6 +2,7 @@ package jobs;
 
 import akka.actor.*;
 import mercariapi.*;
+import slackapi.SlackSender;
 import forms.*;
 import play.*;
 import play.data.*;
@@ -27,43 +28,54 @@ public class MyTaskActor extends UntypedActor{
 		List<ManageItem> newitems = new ArrayList<ManageItem>();
 		MercariSearcher ms = new MercariSearcher();
 		for(ManageItem mitem : manageItems){
+			/*商品データを構成*/
+			mitem.constructMercariItemInfoFromJSON();
+			User user = User.find.where().eq("username",mitem.username).findList().get(0);
+			SlackSender ss = new SlackSender(user.slackurl, user.channel);
 			try{
-				User user = User.find.where().eq("username",mitem.username).findList().get(0);
 				String phpssid = user.phpssid;
 				MercariExhibitter me = new MercariExhibitter(phpssid);
-				
 				//商品の状態を調べる
-				String status = ms.GetItemInfobyItemID(mitem.itemid).status;
-				if(status == "on_sale"){
-					/*まだ売れていない*/
+				MercariItem now_onMercariItem = ms.GetItemInfobyItemID(mitem.itemid);
+				if(now_onMercariItem.status.equals("on_sale") && now_onMercariItem.num_comments == 0){
+					/*まだ売れていないかつコメントが0*/
 					MercariItem newitem = me.SellandCancel(mitem.item);
+					if(newitem == null) throw new IllegalArgumentException();
 					ManageItem newmanageitem = new ManageItem(newitem.id,
 															  user.username,
-															  newitem,
+															  newitem.toJSON(),
 															  false,
 															  mitem.zaiko);
 					newitems.add(newmanageitem);
 					mitem.delete();
+					ss.sendMessage("商品を再出品しました :" + newitem.name);
 				}else{
-					/*商品が売れた or 元々売れていた*/
+					/*商品が売れた or 元々売れていた or 手動で削除した or 売れていないがコメントがついた*/
 					/*在庫がある場合のみ出品*/
 					if(mitem.zaiko - 1 > 0){
 						MercariExhibitItem sellitem = new MercariExhibitItem(mitem.item);
 						MercariItem newitem =  me.Sell(sellitem);
+						if(newitem == null) throw new IllegalArgumentException();
 						ManageItem newmanageitem = new ManageItem(newitem.id,
 																  user.username,
-																  newitem,
+																  newitem.toJSON(),
 																  false,
 																  mitem.zaiko - 1);
 						newitems.add(newmanageitem);
+						if(now_onMercariItem.status == "on_sale"){
+							ss.sendMessage("商品が販売中でなくなり,再出品しました :" + newitem.name);
+						}else{
+							ss.sendMessage("商品にコメントがついたので再出品しました :" + newitem.name);
+						}
 					}else{
-						System.out.println("商品の在庫がなくなりました; " + mitem.itemid);
+						ss.sendMessage("商品の在庫が足りないため出品できませんでした :" + mitem.itemid);
 					}
 					mitem.delete();
-					
 				}
+			}catch(IllegalArgumentException e){
+				ss.sendMessage("商品の再出品に失敗 :" + mitem.itemid);
 			}catch(Exception e){
-				System.out.println("商品の再出品に失敗(ReExhibit)" + mitem.itemid);
+				ss.sendMessage("商品の再出品中に何らかのエラーが発生 :" + mitem.itemid);
 			}
 		}
 		/*最後にすべての商品をDBに保存する*/

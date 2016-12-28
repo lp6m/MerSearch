@@ -18,6 +18,9 @@ public class User extends Model{
 	public String password;
 	
 	public String phpssid;
+
+	public String slackurl;
+	public String channel;
 	
     public static Finder<String, User> find = new Finder<String, User>(String.class, User.class);
 

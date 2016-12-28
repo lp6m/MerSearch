@@ -10,18 +10,21 @@ import java.util.*;
 import views.html.*;
 import actions.*;
 import models.*;
+import slackapi.*;
 
 public class Application extends Controller {
 	public static MercariSearcher mercariapi;
 
 	@With(BasicAuthAction.class)
-    public static Result index() {
+	public static Result index() {
+		MercariSearcher ms = new MercariSearcher();
+		MercariItem it = ms.GetItemInfobyItemID("m332457807");
 		String pop_message = session("message") == null ? "" : session("message");
 		String username = session("username");
 		/*そのユーザーの管理している商品一覧を取得*/
-		List<ManageItem> items = null;
+		List<ManageItem> items = new ArrayList<ManageItem>();
 		if(username != null) items = ManageItem.find.where().eq("username", username).findList();
-		for(ManageItem item : items) item.updateMercariItemforView();
+		for(ManageItem item : items) item.constructMercariItemInfoFromJSON();
 		
 	    return ok(index.render(username, pop_message, items));
     }
@@ -36,7 +39,6 @@ public class Application extends Controller {
 		mercariapi = new MercariSearcher();
 		System.out.println(mercariapi.access_token);
 		List<MercariItem> res = mercariapi.GetAllItemsWithSellers(sellerid,new ArrayList<Integer>(Arrays.asList(2,3)));
-		mercariapi.GetItemInfobyItemID("m170271875"); 
 		return ok(searchresult.render(res));		
 	}
 	
@@ -54,13 +56,19 @@ public class Application extends Controller {
 			String username = f.get("username")[0];
 			String password = f.get("password")[0];
 			String phpssid = f.get("phpssid")[0];
+			String slackurl = f.get("slackurl")[0];
+			String channel = f.get("channel")[0];
 			User user = new User();
 			user.username = username;
 			user.password = password;
 			user.phpssid = phpssid;
+			user.slackurl = slackurl;
+			user.channel = channel;
 			user.save();
+			SlackSender ss = new SlackSender(slackurl, channel);
+			ss.sendMessage("ユーザを作成しました");
 		}
-		return redirect("/");
+		return redirect("/login");
 	}
 	
 	@With(BasicAuthAction.class)

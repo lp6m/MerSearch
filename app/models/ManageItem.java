@@ -31,8 +31,9 @@ public class ManageItem extends Model{
 	@Required
 	public Integer zaiko;
 
-	/*Viewで用いるためのメンバ.MercariItemはSQLでのオブジェクトに変換できないためDBに保存する際はnullとなる*/
-	public MercariItem item_forview;
+	/*MercariItemはSQLでのオブジェクトに変換できないためDBに保存する際はnullとなる*/
+	/*updateMercariItemInfoを実行することで商品情報が構成される*/
+	public MercariItem item;
 	
 	public ManageItem(){
 		
@@ -45,14 +46,15 @@ public class ManageItem extends Model{
 		this.zaiko = zaiko;
 	}
 
-	public void updateMercariItemforView(){
+	/*JSON文字列で保存していたデータからMercariItemのデータを構成*/
+	public void constructMercariItemInfoFromJSON(){
 		try{
 			ObjectMapper mapper = new ObjectMapper();
-			this.item_forview = mapper.readValue(this.itemjson, MercariItem.class);
+			this.item = mapper.readValue(this.itemjson, MercariItem.class);
 			//this.item_forview = JSON.decode(this.itemjson, MercariItem.class);
 		}catch(Exception e){
 			e.printStackTrace();
-			this.item_forview = null;
+			this.item = null;
 		}
 	}
 	

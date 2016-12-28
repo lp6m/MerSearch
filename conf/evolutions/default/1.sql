@@ -22,6 +22,8 @@ create table user (
   username                  varchar(255) not null,
   password                  varchar(255),
   phpssid                   varchar(255),
+  slackurl                  varchar(255),
+  channel                   varchar(255),
   constraint pk_user primary key (username))
 ;
 
