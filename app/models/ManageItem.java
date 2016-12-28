@@ -11,7 +11,6 @@ import play.data.validation.Constraints.*;
 
 import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import net.arnx.jsonic.JSON;
 
 @Entity
 public class ManageItem extends Model{

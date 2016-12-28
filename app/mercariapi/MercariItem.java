@@ -1,3 +1,4 @@
+
 package mercariapi;
 
 import play.*;
@@ -25,11 +26,8 @@ import java.text.SimpleDateFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import net.arnx.jsonic.JSON;
-//import net.arnx.jsonic.JSONHint;
 
 public class MercariItem implements Cloneable{
-	//@JSONHint(ignore = true)	
 	@JsonIgnore
 	public MercariSeller seller; //JSON -> Objectへの変換がうまくいかないのでignore
 	
@@ -78,7 +76,6 @@ public class MercariItem implements Cloneable{
 		try{
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(this);
-			//String json = JSON.encode(this);
 			System.out.println(json);
 			return json;
 		}catch(Exception e){
@@ -103,7 +100,6 @@ public class MercariItem implements Cloneable{
 			this.pager_id = getLongOrNull(json,"pager_id");
 			//this.item_pv = json.getLong("item_pv");
 			this.shipping_from_area = json.getJSONObject("shipping_from_area").getInt("id");
-		    //this.category = new ItemCategory(json.getJSONObject("item_category"));
 			/*カテゴリ*/
 			JSONObject categoryObject = json.getJSONObject("item_category");
 			this.category_id = getIntOrNull(categoryObject, "id");
