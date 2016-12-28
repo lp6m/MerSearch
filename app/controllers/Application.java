@@ -17,10 +17,13 @@ public class Application extends Controller {
 	@With(BasicAuthAction.class)
     public static Result index() {
 		String pop_message = session("message") == null ? "" : session("message");
-		List<ManageItem> items = ManageItem.find.all();
+		String username = session("username");
+		/*そのユーザーの管理している商品一覧を取得*/
+		List<ManageItem> items = null;
+		if(username != null) items = ManageItem.find.where().eq("username", username).findList();
 		for(ManageItem item : items) item.updateMercariItemforView();
 		
-	    return ok(index.render(pop_message, items));
+	    return ok(index.render(username, pop_message, items));
     }
 	public static class SearchForm{
 		public String sellerid;
@@ -162,7 +165,7 @@ public class Application extends Controller {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return redirect("/index");
+		return redirect("/");
 	}
 
 	/*商品管理データベースから当該商品を削除*/
