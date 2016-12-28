@@ -4,7 +4,7 @@
     <p>@message</p>
     <div>
 	  @if(username == null){
-	     <b><a href="/login">ログイン</a></b>してください
+	     <b><a href = @routes.Application.login() >ログイン</a></b>してください
 		 }else{
 		 <b>ログインユーザー: @username</b> 
 	  }
@@ -13,7 +13,7 @@
 	  <p>自動出品する商品の追加-すでに出品している商品の商品ID(mからはじまる)を入力してください.</p><br>
 商品は即時削除され,自動で再出品されます.
 																				  
-        <form action = "/additem" method = "post">
+        <form action = @routes.Application.additem() method = "post">
 	  
 	      商品ID: <input type = "text" name = "itemid"><br>
 		  在庫数: <input type="number" name="zaikonum" value="1" min = "1"><br>
@@ -25,7 +25,7 @@
 	<hr>
 	<p>商品管理</p>
 	<div>
-	  <form action = "/updateManageInfo" method = "post">
+	  <form action = @routes.Application.updateManageInfo() method = "post">
 		<input value = "情報更新" type = "submit">
       </form>
       <br>
@@ -50,7 +50,7 @@
 					<td> @t.zaiko </td>
 					<td> @t.item.created_str </td>
 					<td>
-					  <form action = @{"/deleteManageItem/" + t.itemid} method = "get">
+					  <form action = @routes.Application.deleteManageItem(t.itemid) method = "get">
 						<input value = "DBから削除" type = "submit">
 					  </form>
 					</td>
@@ -61,7 +61,7 @@
 	</div>
 	<div>  
     <p>セラーIDからの商品検索</p>
-    <form action = "/searchresult" method = "get">
+    <form action = @routes.Application.searchresult() method = "get">
 	  
 	  <input type = "text" name = "sellerid"><br>
 	  <input type = "submit">

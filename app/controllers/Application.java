@@ -17,8 +17,6 @@ public class Application extends Controller {
 
 	@With(BasicAuthAction.class)
 	public static Result index() {
-		MercariSearcher ms = new MercariSearcher();
-		MercariItem it = ms.GetItemInfobyItemID("m332457807");
 		String pop_message = session("message") == null ? "" : session("message");
 		String username = session("username");
 		/*そのユーザーの管理している商品一覧を取得*/
@@ -45,7 +43,7 @@ public class Application extends Controller {
 	@With(BasicAuthAction.class)
 	public static Result createuser(){
 		/*adminでないとindexに送り返す*/
-		if(session("username") == null || !session("username").equals("admin")) return redirect("/");
+		if(session("username") == null || !session("username").equals("admin")) return redirect(routes.Application.index());
 		if("GET".equals(request().method())){
 			//GET 画面表示
 			Form<User> f = new Form<User>(User.class);
@@ -68,7 +66,7 @@ public class Application extends Controller {
 			SlackSender ss = new SlackSender(slackurl, channel);
 			ss.sendMessage("ユーザを作成しました");
 		}
-		return redirect("/login");
+		return redirect(routes.Application.login());
 	}
 	
 	@With(BasicAuthAction.class)
@@ -86,7 +84,7 @@ public class Application extends Controller {
 				session("username",user.username);
 				session("password",user.password);
 				if(user.phpssid != null) session("phpssid",user.phpssid);
-				return redirect("/");
+				return redirect(routes.Application.index());
 			}
 			return badRequest(login.render("ERROR"));
 		}catch(Exception e){
@@ -99,7 +97,7 @@ public class Application extends Controller {
 		/*ログイン必須*/
 		if(session("username")==null){
 			session("message","ログインしてください");
-			return redirect("/");
+			return redirect(routes.Application.login());
 		}
 		//POSTのみ
 		try{
@@ -137,25 +135,25 @@ public class Application extends Controller {
 					manageitem.save();
 				}
 				session("message","商品を追加しました" + warnstr);
-				return redirect("/");
+				return redirect(routes.Application.index());
 			}else{
 				/*商品が見つからなかった*/
 				session("message","商品が見つからなかったため,商品を追加できませんでした");
-				return redirect("/");
+				return redirect(routes.Application.index());
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 			session("message","商品の追加に失敗しました");
-			return redirect("/");
+			return redirect(routes.Application.index());
 		}
 	}
 	@With(BasicAuthAction.class)
 	public static Result deleteitem(){
 		//POSTのみ
 		try{
-			return redirect("/");
+			return redirect(routes.Application.index());
 		}catch(Exception e){
-			return redirect("/");
+			return redirect(routes.Application.index());
 		}
 	}
 
@@ -173,7 +171,7 @@ public class Application extends Controller {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return redirect("/");
+		return redirect(routes.Application.index());
 	}
 
 	/*商品管理データベースから当該商品を削除*/
@@ -186,7 +184,7 @@ public class Application extends Controller {
 		}catch(Exception e){
 			session("message","DBから商品を削除するのに失敗しました");
 		}
-		return redirect("/");
+		return redirect(routes.Application.index());
 	}
 }
 	
