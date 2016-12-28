@@ -33,9 +33,7 @@ public class Application extends Controller {
  	public static Result searchresult(){
 		Form<SearchForm> searchform = new Form<SearchForm>(SearchForm.class).bindFromRequest();
 		String sellerid = searchform.get().sellerid; //"220249289"
-		System.out.println(sellerid);
 		mercariapi = new MercariSearcher();
-		System.out.println(mercariapi.access_token);
 		List<MercariItem> res = mercariapi.GetAllItemsWithSellers(sellerid,new ArrayList<Integer>(Arrays.asList(2,3)));
 		return ok(searchresult.render(res));		
 	}
@@ -106,9 +104,6 @@ public class Application extends Controller {
 			Integer zaikonum = Integer.parseInt(f.get("zaikonum")[0]);
 			Boolean deleteflag = f.get("deleteflag")[0].equals("1");
 			Boolean addflag = f.get("adddataflag")[0].equals("1");
-			System.out.println("deleteflag: " + Boolean.toString(deleteflag));
-			System.out.println("addflag: " + Boolean.toString(addflag));
-			
 			/*商品IDから商品の情報を検索*/
 			MercariSearcher s = new MercariSearcher();
 			MercariItem item = s.GetItemInfobyItemID(itemid);

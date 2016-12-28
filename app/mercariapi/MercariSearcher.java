@@ -104,7 +104,7 @@ public class MercariSearcher{
 			List<SimpleEntry<String,String>> param = GetTokenParamListForMercariAPI();
 			param.add(new SimpleEntry<String,String>("id",itemid));
 			MercariRawResponse rawres = SendMercariAPIwithGET("https://api.mercari.jp/items/get",param);
-			//System.out.println(rawres.response);
+			//Logger.info(rawres.response);
 			JSONObject resjson = new JSONObject(rawres.response);
 		    JSONObject iteminfo = resjson.getJSONObject("data");
 			MercariItem item = new MercariItem(iteminfo);
@@ -175,10 +175,10 @@ public class MercariSearcher{
             res = resjson.getJSONObject("data").getString("access_token");
         }catch(Exception e){
             e.printStackTrace();
-            System.out.println("Fail to get access token");
+            Logger.info("Fail to get access token");
             return res;
         }
-        System.out.println("Success to get access token");
+        Logger.info("Success to get access token");
         return res;
     }
     
@@ -197,10 +197,10 @@ public class MercariSearcher{
             res.add(resjson.getJSONObject("data").getString("global_refresh_token"));
         }catch(Exception e){
             e.printStackTrace();
-            System.out.println("Fail to get global access token");
+            Logger.info("Fail to get global access token");
             return res;
         }
-        System.out.println("Success to get global access token");
+        Logger.info("Success to get global access token");
         return res;
     }
     
@@ -227,7 +227,7 @@ public class MercariSearcher{
             con.setRequestProperty("X-PLATFORM",XPLATFORM);
             con.setRequestProperty("X-APP-VERSION",XAPPVERSION); 
             //con.setRequestProperty("Accept-Encoding",ACCEPTENCODING);
-            System.out.println(url);
+            Logger.info(url);
             int responseCode = con.getResponseCode();
         
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
@@ -246,7 +246,7 @@ public class MercariSearcher{
 			e.printStackTrace();
 		}catch(Exception e){
             e.printStackTrace();
-            System.out.println("error");
+            Logger.info("error");
         }
         return res;
     }

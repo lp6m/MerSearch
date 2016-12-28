@@ -75,7 +75,7 @@ public class MercariExhibitter{
 			return s.GetItemInfobyItemID(itemid);
 		}catch(Exception e){
 			e.printStackTrace();
-			System.out.println("出品に失敗しました");
+			Logger.info("出品に失敗しました");
 			return null;
 		}
 	}
@@ -86,7 +86,7 @@ public class MercariExhibitter{
 			/*TODO:商品ページに実際にアクセスして消えていればOK*/
 			return true;
 		}catch(Exception e){
-			System.out.println("商品の削除に失敗しました");
+			Logger.info("商品の削除に失敗しました");
 			return false;
 		}
 	}
@@ -164,7 +164,6 @@ public class MercariExhibitter{
 				paramstr.add(k + "=" + v);
             }
             urlParameters = String.join("&",paramstr);
-            System.out.println(urlParameters);
 			//POST送信
 			con.setDoOutput(true);
 			DataOutputStream wr = new DataOutputStream(con.getOutputStream());

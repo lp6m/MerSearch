@@ -76,7 +76,6 @@ public class MercariItem implements Cloneable{
 		try{
 			ObjectMapper mapper = new ObjectMapper();
 			String json = mapper.writeValueAsString(this);
-			System.out.println(json);
 			return json;
 		}catch(Exception e){
 			e.printStackTrace();

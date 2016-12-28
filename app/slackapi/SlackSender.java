@@ -30,7 +30,6 @@ public class SlackSender{
 			HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 			con.setRequestMethod("POST");
             String urlParameters = "payload=" + URLEncoder.encode("{\"channel\": \"" + this.channel + "\", \"text\": \"" + message + "\",}\"", "UTF-8");
-            System.out.println(urlParameters);
 			//POST送信
 			con.setDoOutput(true);
 			DataOutputStream wr = new DataOutputStream(con.getOutputStream());

@@ -44,7 +44,7 @@ public class MercariExhibitItem{
 			for(int i = 0; i < this.imageurls.length; i++) this.imageurls[i] = item.imageurls[i];
 		}catch(Exception e){
 			/*手数料計算失敗した場合や,size,brand_name以外の必須項目がnullになっていた場合は例外発生する*/
-			System.out.println("MercariItemからMercariExhibitItemへの変換に失敗");
+			Logger.info("MercariItemからMercariExhibitItemへの変換に失敗");
 		}
 	}
 	public List<SimpleEntry<String,String>> toParamList(){

@@ -81,7 +81,7 @@ public class MyTaskActor extends UntypedActor{
 		/*最後にすべての商品をDBに保存する*/
 		for(ManageItem newitem : newitems){
 			newitem.save();
-			System.out.println("商品をDBに追加しました: " + newitem.itemid);
+			Logger.info("商品をDBに追加しました: " + newitem.itemid);
 		}
 	}
 		
