@@ -5,23 +5,28 @@ import play.mvc.*;
 import java.util.*;
 
 import views.html.*;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.URL;
+import java.net.URI;
 import java.net.HttpURLConnection;
-import java.io.DataOutputStream;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
 import java.nio.charset.Charset;
 import javax.net.ssl.HttpsURLConnection;
-import java.io.FileNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.net.URLEncoder;
 import java.net.URLDecoder;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.params.HttpParams;
+import org.apache.http.HttpEntity;
+import org.apache.http.util.EntityUtils;
 
 public class MercariSearcher{
     private final String USER_AGENT = "Mercari_r/511 (Android 23; ja; arm64-v8a,; samsung SC-02H Build/6.0.1)";
@@ -67,6 +72,148 @@ public class MercariSearcher{
         }
         return rst;
     }
+
+	//ログインを試行し,グローバルアクセストークンを更新する.
+	//返り値: 成功時:true 失敗 :false
+	public Boolean MercariLogin(String email, String password){
+		/*revert,android_id,device_id,app_generated_idなどのパラメタはなくてもOKなので送らない*/
+		List<SimpleEntry<String,String>> param = new ArrayList<SimpleEntry<String,String>>();
+		param.add(new SimpleEntry<String,String>("email",email));
+		param.add(new SimpleEntry<String,String>("password",password));
+		/*iv_certは恐らく招待コードを確認するためのもの.140文字のダミー文字列でOK*/
+		String iv_cert = "";
+		for(int i = 0; i < 140; i++) iv_cert += "a";
+		param.add(new SimpleEntry<String,String>("iv_cert",iv_cert));
+		String url = "https://api.mercari.jp/users/login?_access_token=" + this.access_token + "&_global_access_token=" + this.global_access_token;
+		MercariRawResponse rawres = SendMercariAPIwithPOST(url, param);
+		if(rawres.error) return false;
+		try{
+			/*グローバルアクセストークンを更新*/
+			JSONObject resjson = new JSONObject(rawres.response);
+			String new_global_access_token = resjson.getJSONObject("data").getString("global_access_token");
+			this.global_access_token = new_global_access_token;
+			Logger.info("ログイン成功");
+			return true;
+		}catch(Exception e){
+			Logger.info("ログイン失敗");
+			return false;
+		}
+	}
+
+	private String getExhibitToken(){
+		String uuid = UUID.randomUUID().toString();
+		String[] uuidarray = uuid.split("");
+		String rst = "";
+		for(int i = 0; i < uuidarray.length; i++) if(!uuidarray[i].equals("-")) rst += uuidarray[i];
+		return rst;
+	}
+	public File[] getFileObjectFromURL(String[] urlstr){
+		File[] rstfile = new File[4];
+		for(int i = 0; i < 4; i++){
+			if(urlstr[i].equals("")) continue;//空文字列の場合は画像が存在しない
+			try{
+				URL url = new URL(urlstr[i]);
+				URLConnection conn = url.openConnection();
+				InputStream in = conn.getInputStream();
+				
+				File file = new File("tmp"+Integer.toString(i)+".jpg");
+				FileOutputStream out = new FileOutputStream(file, false);
+				int b;
+				while((b = in.read()) != -1){
+					out.write(b);
+				}
+				out.close();
+				in.close();
+				rstfile[i] = file;
+			}catch(Exception e){
+				Logger.info("出品時の画像の取得に失敗");
+			}
+		}
+		return rstfile;
+	}
+
+	//商品の出品.要ログイン
+	//返り値: 成功:新しい商品オブジェクト 失敗:null
+	public MercariItem Sell(MercariItem item){
+		try{
+			DefaultHttpClient httpclient = new DefaultHttpClient();
+			HttpParams params = httpclient.getParams();
+
+			String url = "https://api.mercari.jp/sellers/sell?_access_token=" + this.access_token + "&_global_access_token=" + this.global_access_token;
+			HttpPost httpPost = new HttpPost(url);
+			httpPost.setHeader("User-Agent",USER_AGENT);
+			httpPost.setHeader("X-PLATFORM",XPLATFORM);
+            httpPost.setHeader("X-APP-VERSION",XAPPVERSION); 
+
+			File[] uploadFile = getFileObjectFromURL(item.imageurls);
+			
+			/*手数料を計算する*/
+			Integer sales_fee = GetSalesFee(item.price, item.category_id);
+			MultipartEntity reqEntity = new MultipartEntity();
+
+			reqEntity.addPart("name",new StringBody(item.name,Charset.forName("UTF-8")));
+			reqEntity.addPart("price",new StringBody(item.price.toString()));
+			reqEntity.addPart("sales_fee",new StringBody(sales_fee.toString()));
+			reqEntity.addPart("description",new StringBody(item.description,Charset.forName("UTF-8")));
+			reqEntity.addPart("category_id",new StringBody(item.category_id.toString()));
+			reqEntity.addPart("item_condition",new StringBody(item.item_condition.toString()));
+			reqEntity.addPart("shipping_payer",new StringBody(item.shipping_payer.toString()));
+			reqEntity.addPart("shipping_method",new StringBody(item.shipping_method.toString()));
+			reqEntity.addPart("shipping_from_area",new StringBody(item.shipping_from_area.toString()));
+			reqEntity.addPart("shipping_duration",new StringBody(item.shipping_duration.toString()));
+			reqEntity.addPart("_ignore_warning",new StringBody("false"));
+			reqEntity.addPart("exhibit_token",new StringBody(getExhibitToken()));
+			reqEntity.addPart("pixel_ratio",new StringBody("4.0"));
+			if(!item.imageurls[0].equals("")) reqEntity.addPart("photo_1", new FileBody(uploadFile[0]));
+			if(!item.imageurls[1].equals("")) reqEntity.addPart("photo_2", new FileBody(uploadFile[1]));
+			if(!item.imageurls[2].equals("")) reqEntity.addPart("photo_3", new FileBody(uploadFile[2]));
+			if(!item.imageurls[3].equals("")) reqEntity.addPart("photo_4", new FileBody(uploadFile[3]));
+			
+			httpPost.setEntity(reqEntity);
+
+			HttpResponse response = httpclient.execute(httpPost);
+			HttpEntity entity = response.getEntity();
+			String responseString = EntityUtils.toString(entity, "UTF-8");
+			JSONObject resjson = new JSONObject(responseString);
+			MercariItem rstitem = new MercariItem(resjson.getJSONObject("data"));
+			System.out.println(rstitem.name);
+			return rstitem;
+		}catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
+	//商品を削除する.要ログイン
+	//返り値: 成功:true 失敗:false
+	public Boolean Cancel(MercariItem item){
+		try{
+			String url = "https://api.mercari.jp/items/update_status?_access_token=" + this.access_token + "&_global_access_token=" + this.global_access_token;
+			List<SimpleEntry<String,String>> param = new ArrayList<SimpleEntry<String,String>>();
+			param.add(new SimpleEntry<String,String>("item_id",item.id));
+			param.add(new SimpleEntry<String,String>("status","cancel"));
+		
+			MercariRawResponse rawres = SendMercariAPIwithPOST(url, param);
+			if(rawres.error) return false;
+			/*グローバルアクセストークンを更新*/
+			JSONObject resjson = new JSONObject(rawres.response);
+			String result = resjson.getString("result");
+			if(!result.equals("OK")) throw new IllegalArgumentException();
+			Logger.info("商品の削除に成功");
+			return true;
+		}catch(Exception e){
+			Logger.info("商品の削除に失敗");
+			return false;
+		}
+	}
+
+	//商品を削除して出品する.要ログイン
+	//返り値: 成功:新しい商品オブジェクト 失敗:null
+	public MercariItem CancelandSell(String itemid){
+		MercariItem item = GetItemInfobyItemID(itemid);
+		if(Cancel(item)) return null;
+		return Sell(item);
+	}
+	
 	//最新の手数料のレートに応じて手数料を求める
 	//手数料取得失敗時は負の値が返る
 	public Integer GetSalesFee(Integer price,Integer category_id){
@@ -293,6 +440,9 @@ public class MercariSearcher{
 				response.append(inputLine);
 			}
 			in.close();
+			
+            res.response = response.toString();
+            res.error = false;
 		}catch(Exception e){
 			e.printStackTrace();
 		}
