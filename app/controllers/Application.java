@@ -23,7 +23,7 @@ public class Application extends Controller {
 		List<ManageItem> items = new ArrayList<ManageItem>();
 		if(username != null) items = ManageItem.find.where().eq("username", username).findList();
 		for(ManageItem item : items) item.constructMercariItemInfoFromJSON();
-		
+		mercariapi = new MercariSearcher();
 	    return ok(index.render(username, pop_message, items));
     }
 	public static class SearchForm{
@@ -45,19 +45,25 @@ public class Application extends Controller {
 		if("GET".equals(request().method())){
 			//GET 画面表示
 			Form<User> f = new Form<User>(User.class);
-			return ok(createuser.render());
+			return ok(createuser.render(""));
 		}else{
 			//POST ユーザ作成
 			Map<String,String[]> f = request().body().asFormUrlEncoded();
 			String username = f.get("username")[0];
 			String password = f.get("password")[0];
-			String phpssid = f.get("phpssid")[0];
+			String mercari_email = f.get("mercari_email")[0];
+			String mercari_password = f.get("mercari_password")[0];
 			String slackurl = f.get("slackurl")[0];
 			String channel = f.get("channel")[0];
+			/*アクセストークンを取得する*/
+			MercariSearcher ms = new MercariSearcher();
+			Boolean ok = ms.tryMercariLogin(mercari_email, mercari_password);
+			if(ok == false) return badRequest(createuser.render("メルカリのログインに失敗"));
 			User user = new User();
 			user.username = username;
 			user.password = password;
-			user.phpssid = phpssid;
+			user.access_token = ms.access_token;
+			user.global_access_token = ms.global_access_token;
 			user.slackurl = slackurl;
 			user.channel = channel;
 			user.save();
@@ -81,7 +87,6 @@ public class Application extends Controller {
 			if(user != null){
 				session("username",user.username);
 				session("password",user.password);
-				if(user.phpssid != null) session("phpssid",user.phpssid);
 				return redirect(routes.Application.index());
 			}
 			return badRequest(login.render("ERROR"));
@@ -104,26 +109,25 @@ public class Application extends Controller {
 			Integer zaikonum = Integer.parseInt(f.get("zaikonum")[0]);
 			Boolean deleteflag = f.get("deleteflag")[0].equals("1");
 			Boolean addflag = f.get("adddataflag")[0].equals("1");
+			User user = User.find.byId(session("username"));
 			/*商品IDから商品の情報を検索*/
-			MercariSearcher s = new MercariSearcher();
-			MercariItem item = s.GetItemInfobyItemID(itemid);
+			MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token);
+			MercariItem item = ms.GetItemInfobyItemID(itemid);
 			if(item != null){
 				String warnstr = "";
-				MercariExhibitter me = new MercariExhibitter(session("phpssid"));
 				/*まずその商品を即時削除する.*/
 				if(deleteflag){
-					Boolean cancel_rst = me.Cancel(itemid);
+					Boolean cancel_rst = ms.Cancel(item);
 					if(cancel_rst == false){ /*他人の商品の場合は削除に失敗する(はず)*/
 						warnstr = "警告: 商品の削除に失敗（他人の商品？）";
 					}
 				}
 				/*即時商品の出品*/
-				MercariExhibitItem sell_item = new MercariExhibitItem(item);
-				MercariItem new_item = me.Sell(sell_item);
+				MercariItem new_item = ms.Sell(item);
 				if(addflag){
 					/*商品を管理データベースに追加する*/
 					ManageItem manageitem = new ManageItem(new_item.id,
-														   session("username"),
+														   user.username,
 														   new_item.toJSON(),
 														   false,
 														   zaikonum);

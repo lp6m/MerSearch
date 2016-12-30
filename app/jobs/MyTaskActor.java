@@ -26,20 +26,19 @@ public class MyTaskActor extends UntypedActor{
 	public static void ReExhibit(){
 		List<ManageItem> manageItems = ManageItem.find.all();
 		List<ManageItem> newitems = new ArrayList<ManageItem>();
-		MercariSearcher ms = new MercariSearcher();
+		//MercariSearcher ms = new MercariSearcher();
 		for(ManageItem mitem : manageItems){
 			/*商品データを構成*/
 			mitem.constructMercariItemInfoFromJSON();
 			User user = User.find.where().eq("username",mitem.username).findList().get(0);
 			SlackSender ss = new SlackSender(user.slackurl, user.channel);
 			try{
-				String phpssid = user.phpssid;
-				MercariExhibitter me = new MercariExhibitter(phpssid);
+				MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token);
 				//商品の状態を調べる
 				MercariItem now_onMercariItem = ms.GetItemInfobyItemID(mitem.itemid);
 				if(now_onMercariItem.status.equals("on_sale") && now_onMercariItem.num_comments == 0){
 					/*まだ売れていないかつコメントが0*/
-					MercariItem newitem = me.SellandCancel(mitem.item);
+					MercariItem newitem = ms.CancelandSell(mitem.itemid);
 					if(newitem == null) throw new IllegalArgumentException();
 					ManageItem newmanageitem = new ManageItem(newitem.id,
 															  user.username,
@@ -53,8 +52,7 @@ public class MyTaskActor extends UntypedActor{
 					/*商品が売れた or 元々売れていた or 手動で削除した or 売れていないがコメントがついた*/
 					/*在庫がある場合のみ出品*/
 					if(mitem.zaiko - 1 > 0){
-						MercariExhibitItem sellitem = new MercariExhibitItem(mitem.item);
-						MercariItem newitem =  me.Sell(sellitem);
+						MercariItem newitem =  ms.Sell(mitem.item);
 						if(newitem == null) throw new IllegalArgumentException();
 						ManageItem newmanageitem = new ManageItem(newitem.id,
 																  user.username,

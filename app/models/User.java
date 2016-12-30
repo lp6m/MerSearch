@@ -17,7 +17,9 @@ public class User extends Model{
 	@Required
 	public String password;
 	
-	public String phpssid;
+	//public String phpssid;
+	public String global_access_token;
+	public String access_token;
 
 	public String slackurl;
 	public String channel;

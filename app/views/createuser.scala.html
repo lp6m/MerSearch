@@ -1,11 +1,13 @@
-
+@(message: String)
 @main("Welcome to Merpicker") {
     <p>新規ユーザ作成</p>
+    <p>@message</p>
     <form action = @routes.Application.createuser() method = "post">
 	  
 	  username: <input type = "text" name = "username"><br>
 	  password: <input type = "password" name = "password"><br>
-  	  phpssid: <input type = "text" name = "phpssid"><br>
+  	  Mercari e-mail: <input type = "text" name = "mercari_email"><br>
+	  Mercari password: <input type = "password" name = "mercari_password"><br>
 	  SlackURL: <input type = "text" name = "slackurl"><br>
 	  Channel:(#からはじめてください)<input type = "text" name = "channel"><br>
 	  <input type = "submit">

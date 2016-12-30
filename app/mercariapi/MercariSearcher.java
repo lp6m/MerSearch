@@ -55,7 +55,13 @@ public class MercariSearcher{
     
     public String access_token;
     public String global_access_token;
-    public String global_refresh_token;
+    public String global_refresh_token; //未使用
+
+	/*アクセストークンを使用してインスタンスを生成*/
+	public MercariSearcher(String access_token,String global_access_token){
+		this.access_token = access_token;
+		this.global_access_token = global_access_token;
+	}
     public MercariSearcher(){
         MercariAPIInitialize();
     }
@@ -75,7 +81,7 @@ public class MercariSearcher{
 
 	//ログインを試行し,グローバルアクセストークンを更新する.
 	//返り値: 成功時:true 失敗 :false
-	public Boolean MercariLogin(String email, String password){
+	public Boolean tryMercariLogin(String email, String password){
 		/*revert,android_id,device_id,app_generated_idなどのパラメタはなくてもOKなので送らない*/
 		List<SimpleEntry<String,String>> param = new ArrayList<SimpleEntry<String,String>>();
 		param.add(new SimpleEntry<String,String>("email",email));
