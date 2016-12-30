@@ -21,7 +21,8 @@ create table manage_item (
 create table user (
   username                  varchar(255) not null,
   password                  varchar(255),
-  phpssid                   varchar(255),
+  global_access_token       TEXT,
+  access_token              TEXT,
   slackurl                  varchar(255),
   channel                   varchar(255),
   constraint pk_user primary key (username))

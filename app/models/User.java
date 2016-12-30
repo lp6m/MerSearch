@@ -18,7 +18,10 @@ public class User extends Model{
 	public String password;
 	
 	//public String phpssid;
+	@Column(columnDefinition = "TEXT")
 	public String global_access_token;
+
+	@Column(columnDefinition = "TEXT")	
 	public String access_token;
 
 	public String slackurl;

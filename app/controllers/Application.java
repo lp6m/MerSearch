@@ -17,7 +17,7 @@ public class Application extends Controller {
 
 	@With(BasicAuthAction.class)
 	public static Result index() {
-		String pop_message = session("message") == null ? "" : session("message");
+	    String pop_message = session("message") == null ? "" : session("message");
 		String username = session("username");
 		/*そのユーザーの管理している商品一覧を取得*/
 		List<ManageItem> items = new ArrayList<ManageItem>();
