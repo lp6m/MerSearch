@@ -216,7 +216,7 @@ public class MercariSearcher{
 	//返り値: 成功:新しい商品オブジェクト 失敗:null
 	public MercariItem CancelandSell(String itemid){
 		MercariItem item = GetItemInfobyItemID(itemid);
-		if(Cancel(item)) return null;
+		Cancel(item); //削除失敗した場合も出品はする
 		return Sell(item);
 	}
 	
