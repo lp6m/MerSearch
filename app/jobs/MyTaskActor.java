@@ -31,8 +31,9 @@ public class MyTaskActor extends UntypedActor{
 			/*商品データを構成*/
 			mitem.constructMercariItemInfoFromJSON();
 			User user = User.find.where().eq("username",mitem.username).findList().get(0);
-			SlackSender ss = new SlackSender(user.slackurl, user.channel);
+			SlackSender ss = new SlackSender(user.slackurl, user.channel);	
 			try{
+				Thread.sleep(60000);
 				MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token);
 				//商品の状態を調べる
 				MercariItem now_onMercariItem = ms.GetItemInfobyItemID(mitem.itemid);

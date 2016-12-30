@@ -214,9 +214,10 @@ public class MercariSearcher{
 
 	//商品を削除して出品する.要ログイン
 	//返り値: 成功:新しい商品オブジェクト 失敗:null
-	public MercariItem CancelandSell(String itemid){
+	public MercariItem CancelandSell(String itemid) throws InterruptedException{
 		MercariItem item = GetItemInfobyItemID(itemid);
 		Cancel(item); //削除失敗した場合も出品はする
+		Thread.sleep(60000);
 		return Sell(item);
 	}
 	
