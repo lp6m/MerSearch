@@ -42,33 +42,35 @@ public class Application extends Controller {
 	public static Result createuser(){
 		/*adminでないとindexに送り返す*/
 		if(session("username") == null || !session("username").equals("admin")) return redirect(routes.Application.index());
-		if("GET".equals(request().method())){
-			//GET 画面表示
-			Form<User> f = new Form<User>(User.class);
-			return ok(createuser.render(""));
-		}else{
-			//POST ユーザ作成
-			Map<String,String[]> f = request().body().asFormUrlEncoded();
-			String username = f.get("username")[0];
-			String password = f.get("password")[0];
-			String mercari_email = f.get("mercari_email")[0];
-			String mercari_password = f.get("mercari_password")[0];
-			String slackurl = f.get("slackurl")[0];
-			String channel = f.get("channel")[0];
-			/*アクセストークンを取得する*/
-			MercariSearcher ms = new MercariSearcher();
-			Boolean ok = ms.tryMercariLogin(mercari_email, mercari_password);
-			if(ok == false) return badRequest(createuser.render("メルカリのログインに失敗"));
-			User user = new User();
-			user.username = username;
-			user.password = password;
-			user.access_token = ms.access_token;
-			user.global_access_token = ms.global_access_token;
-			user.slackurl = slackurl;
-			user.channel = channel;
-			user.save();
-			SlackSender ss = new SlackSender(slackurl, channel);
-			ss.sendMessage("ユーザを作成しました");
+		else{
+			if("GET".equals(request().method())){
+				//GET 画面表示
+				Form<User> f = new Form<User>(User.class);
+				return ok(createuser.render(""));
+			}else{
+				//POST ユーザ作成
+				Map<String,String[]> f = request().body().asFormUrlEncoded();
+				String username = f.get("username")[0];
+				String password = f.get("password")[0];
+				String mercari_email = f.get("mercari_email")[0];
+				String mercari_password = f.get("mercari_password")[0];
+				String slackurl = f.get("slackurl")[0];
+				String channel = f.get("channel")[0];
+				/*アクセストークンを取得する*/
+				MercariSearcher ms = new MercariSearcher();
+				Boolean ok = ms.tryMercariLogin(mercari_email, mercari_password);
+				if(ok == false) return badRequest(createuser.render("メルカリのログインに失敗"));
+				User user = new User();
+				user.username = username;
+				user.password = password;
+				user.access_token = ms.access_token;
+				user.global_access_token = ms.global_access_token;
+				user.slackurl = slackurl;
+				user.channel = channel;
+				user.save();
+				SlackSender ss = new SlackSender(slackurl, channel);
+				ss.sendMessage("ユーザを作成しました");
+			}
 		}
 		return redirect(routes.Application.login());
 	}
@@ -171,6 +173,22 @@ public class Application extends Controller {
 			ManageItem item = ManageItem.find.where().eq("itemid",itemid).findList().get(0);
 			item.delete();
 			session("message","DBから商品を削除しました : " + itemid);
+		}catch(Exception e){
+			session("message","DBから商品を削除するのに失敗しました");
+		}
+		return redirect(routes.Application.index());
+	}
+
+	/*商品管理データベースの在庫数を更新*/
+	@With(BasicAuthAction.class)
+	public static Result updateZaikoNum(String itemid){
+		try{
+			Map<String, String[]> f = request().queryString();
+			Integer zaikonum  = Integer.parseInt(f.get("zaikonum")[0]);
+			ManageItem item = ManageItem.find.where().eq("itemid",itemid).findList().get(0);
+			item.zaiko = zaikonum;
+			item.update();
+			session("message","DBの在庫数を変更しました : " + itemid);
 		}catch(Exception e){
 			session("message","DBから商品を削除するのに失敗しました");
 		}

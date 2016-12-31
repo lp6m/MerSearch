@@ -19,3 +19,4 @@ POST /additem controllers.Application.additem()
 POST /updateManageInfo controllers.Application.updateManageInfo()
 
 GET /deleteManageItem/:itemid controllers.Application.deleteManageItem(itemid: String)
+GET /updateZaikoNum/:itemid controllers.Application.updateZaikoNum(itemid:String)

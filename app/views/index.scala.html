@@ -47,7 +47,12 @@
 					<td> @t.item.name </td>
 					<td> @t.item.num_likes </td>
 					<td> @t.item.num_comments </td>
-					<td> @t.zaiko </td>
+					<td>
+					  <form action = @routes.Application.updateZaikoNum(t.itemid) method = "get">
+						<input type="number" name="zaikonum" value = @t.zaiko min = "1"><br>
+						<input value = "在庫更新" type = "submit">
+					  </form>
+					</td>
 					<td> @t.item.created_str </td>
 					<td>
 					  <form action = @routes.Application.deleteManageItem(t.itemid) method = "get">
