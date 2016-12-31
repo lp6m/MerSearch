@@ -15,7 +15,6 @@ GET /createuser controllers.Application.createuser()
 POST /createuser controllers.Application.createuser()
 
 POST /additem controllers.Application.additem()
-POST /deleteitem controllers.Application.deleteitem()
 
 POST /updateManageInfo controllers.Application.updateManageInfo()
 

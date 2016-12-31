@@ -300,10 +300,10 @@ public class MercariSearcher{
 				JSONObject resjson = new JSONObject(rawres.response);
 				JSONArray datas = resjson.getJSONArray("data");
 				has_next = resjson.getJSONObject("meta").getBoolean("has_next");
-				//1件ずつデータとりだし
+				//1件ずつデータとりだし1つずつAPIを叩いて詳しい情報を取得する
 				for(int i = 0; i < datas.length(); i++){
-					JSONObject iteminfo = datas.getJSONObject(i);
-					MercariItem item = new MercariItem(iteminfo);
+					String itemid = datas.getJSONObject(i).getString("id");
+					MercariItem item = GetItemInfobyItemID(itemid);
 					res.add(item);
 					max_pager_id = item.pager_id.toString(); //次のリクエストで使うためにmax_pager_id更新
 				}

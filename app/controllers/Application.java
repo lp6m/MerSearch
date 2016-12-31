@@ -146,15 +146,6 @@ public class Application extends Controller {
 			return redirect(routes.Application.index());
 		}
 	}
-	@With(BasicAuthAction.class)
-	public static Result deleteitem(){
-		//POSTのみ
-		try{
-			return redirect(routes.Application.index());
-		}catch(Exception e){
-			return redirect(routes.Application.index());
-		}
-	}
 
 	//管理データベースの商品情報を更新する
 	@With(BasicAuthAction.class)
