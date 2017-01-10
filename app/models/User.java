@@ -23,7 +23,7 @@ public class User extends Model{
 
 	@Column(columnDefinition = "TEXT")	
 	public String access_token;
-
+	public String sellerid;
 	public String slackurl;
 	public String channel;
 	

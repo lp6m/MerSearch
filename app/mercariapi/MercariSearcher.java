@@ -56,11 +56,12 @@ public class MercariSearcher{
     public String access_token;
     public String global_access_token;
     public String global_refresh_token; //未使用
-
+	public String sellerid;
 	/*アクセストークンを使用してインスタンスを生成*/
-	public MercariSearcher(String access_token,String global_access_token){
+	public MercariSearcher(String access_token,String global_access_token,String sellerid){
 		this.access_token = access_token;
 		this.global_access_token = global_access_token;
+		this.sellerid = sellerid;
 	}
     public MercariSearcher(){
         MercariAPIInitialize();
@@ -96,7 +97,10 @@ public class MercariSearcher{
 		try{
 			/*グローバルアクセストークンを更新*/
 			JSONObject resjson = new JSONObject(rawres.response);
+			System.out.println(resjson);
 			String new_global_access_token = resjson.getJSONObject("data").getString("global_access_token");
+			Integer sellerid = resjson.getJSONObject("data").getInt("id");
+			this.sellerid = Integer.toString(sellerid);
 			this.global_access_token = new_global_access_token;
 			Logger.info("ログイン成功");
 			return true;

@@ -34,7 +34,7 @@ public class MyTaskActor extends UntypedActor{
 			SlackSender ss = new SlackSender(user.slackurl, user.channel);	
 			try{
 				Thread.sleep(60000);
-				MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token);
+				MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token, user.sellerid);
 				//商品の状態を調べる
 				MercariItem now_onMercariItem = ms.GetItemInfobyItemID(mitem.itemid);
 				if(now_onMercariItem.status.equals("on_sale") && now_onMercariItem.num_comments == 0){

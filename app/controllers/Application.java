@@ -24,6 +24,7 @@ public class Application extends Controller {
 		if(username != null) items = ManageItem.find.where().eq("username", username).findList();
 		for(ManageItem item : items) item.constructMercariItemInfoFromJSON();
 		mercariapi = new MercariSearcher();
+		mercariapi.tryMercariLogin("yakkun.net@gmail.com","yakkun3415");
 	    return ok(index.render(username, pop_message, items));
     }
 	public static class SearchForm{
@@ -65,6 +66,7 @@ public class Application extends Controller {
 				user.password = password;
 				user.access_token = ms.access_token;
 				user.global_access_token = ms.global_access_token;
+				user.sellerid = ms.sellerid;
 				user.slackurl = slackurl;
 				user.channel = channel;
 				user.save();
@@ -113,7 +115,7 @@ public class Application extends Controller {
 			Boolean addflag = f.get("adddataflag")[0].equals("1");
 			User user = User.find.byId(session("username"));
 			/*商品IDから商品の情報を検索*/
-			MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token);
+			MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token, user.sellerid);
 			MercariItem item = ms.GetItemInfobyItemID(itemid);
 			if(item != null){
 				String warnstr = "";
