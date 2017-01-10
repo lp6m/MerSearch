@@ -23,6 +23,7 @@ create table user (
   password                  varchar(255),
   global_access_token       TEXT,
   access_token              TEXT,
+  sellerid                  varchar(255),
   slackurl                  varchar(255),
   channel                   varchar(255),
   constraint pk_user primary key (username))

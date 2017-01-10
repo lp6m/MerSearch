@@ -1,4 +1,4 @@
-@(username: String, message: String, ManageList: List[ManageItem])
+@(username: String, message: String, ManageList: List[ManageItem], OnSales: List[mercariapi.MercariItem], Tradings: List[mercariapi.MercariItem])
 
 @main("Welcome to Merpicker") {
     <p>@message</p>
@@ -17,8 +17,8 @@
 	  
 	      商品ID: <input type = "text" name = "itemid"><br>
 		  在庫数: <input type="number" name="zaikonum" value="1" min = "1"><br>
-		  <input type="checkbox" name="deleteflag" value="1" checked="checked">商品を即時削除する<br>
-		  <input type="checkbox" name="adddataflag" value="1" checked="checked">出品したデータを定期管理データベースに追加
+		  <input type="checkbox" name="deleteflag" value="1" 商品を即時削除する<br>
+		  <input type="checkbox" name="adddataflag" value="1"出品したデータを定期管理データベースに追加
 	    <input type = "submit">
 	    </form>
 	</div>
@@ -59,6 +59,70 @@
 						<input value = "DBから削除" type = "submit">
 					  </form>
 					</td>
+				  </tr>	
+				  }
+	  </table>
+	  <hr>
+	  <p>現在出品中リスト</p>
+	<div>
+      <br>
+      <table border = "1" class="table table-hover">
+		<tr>
+		  <th> 商品ID </th>
+		  <th> 商品画像 </th>
+		  <th> 商品タイトル </th>
+		  <th> いいね数 </th>
+		  <th> コメント数</th>
+		  <th> 出品日時 </th>
+		  <th>  </th>
+		</tr>
+		@for(t <- OnSales){
+				  <tr>
+					<td> <a href= @{"https://www.mercari.com/jp/items/" + t.id} target="_blank"> @t.id </a></td>
+					<td> <img src = @t.imageurls(0) width = "100" height = "100"> </td> 
+					<td> @t.name </td>
+					<td> @t.num_likes </td>
+					<td> @t.num_comments </td>
+					<td> @t.created_str </td>
+					<td>
+					  <form action = @routes.Application.delandSell(t.id) method = "get">
+						<input value = "削除+再出品" type = "submit">
+					  </form>
+					  <br>
+					  <form action = @routes.Application.clonesell(t.id) method = "get">
+						<input value = "クローン出品" type = "submit">
+					  </form>
+					  <br>
+					  <form action = @routes.Application.cancelItem(t.id) method = "get">
+						<input value = "削除" type = "submit">
+					  </form>
+					</td>
+				  </tr>	
+				  }
+	  </table>
+	  <hr>
+	  <p>現在取引中リスト</p>
+	<div>
+      <br>
+      <table border = "1" class="table table-hover">
+		<tr>
+		  <th> 商品ID </th>
+		  <th> 商品画像 </th>
+		  <th> 商品タイトル </th>
+		  <th> いいね数 </th>
+		  <th> コメント数</th>
+		  <th> 出品日時 </th>
+		  <th> 更新日時</th>
+		</tr>
+		@for(t <- Tradings){
+				  <tr>
+					<td> <a href= @{"https://www.mercari.com/jp/items/" + t.id} target="_blank"> @t.id </a></td>
+					<td> <img src = @t.imageurls(0) width = "100" height = "100"> </td> 
+					<td> @t.name </td>
+					<td> @t.num_likes </td>
+					<td> @t.num_comments </td>
+					<td> @t.created_str </td>
+					<td> @t.updated_str </td>
 				  </tr>	
 				  }
 	  </table>

@@ -15,17 +15,25 @@ import slackapi.*;
 public class Application extends Controller {
 	public static MercariSearcher mercariapi;
 
-	@With(BasicAuthAction.class)
+	//	@With(BasicAuthAction.class)
 	public static Result index() {
 	    String pop_message = session("message") == null ? "" : session("message");
 		String username = session("username");
 		/*そのユーザーの管理している商品一覧を取得*/
-		List<ManageItem> items = new ArrayList<ManageItem>();
-		if(username != null) items = ManageItem.find.where().eq("username", username).findList();
-		for(ManageItem item : items) item.constructMercariItemInfoFromJSON();
-		mercariapi = new MercariSearcher();
-		mercariapi.tryMercariLogin("yakkun.net@gmail.com","yakkun3415");
-	    return ok(index.render(username, pop_message, items));
+		List<ManageItem> manageitems = new ArrayList<ManageItem>();
+		if(username != null) manageitems = ManageItem.find.where().eq("username", username).findList();
+		for(ManageItem item : manageitems) item.constructMercariItemInfoFromJSON();
+		List<MercariItem> on_sales = new ArrayList<MercariItem>();
+		List<MercariItem> tradings = new ArrayList<MercariItem>();
+		if(username != null){
+			try{
+				User user = User.find.where().eq("username",username).findList().get(0);
+				mercariapi = new MercariSearcher(user.access_token, user.global_access_token, user.sellerid);
+				on_sales = mercariapi.GetAllItemsWithSellers(user.sellerid,new ArrayList<Integer>(Arrays.asList(1)));
+				tradings = mercariapi.GetAllItemsWithSellers(user.sellerid,new ArrayList<Integer>(Arrays.asList(2)));
+			}catch(Exception e){}
+		}
+	    return ok(index.render(username, pop_message, manageitems, on_sales, tradings));
     }
 	public static class SearchForm{
 		public String sellerid;
@@ -193,6 +201,59 @@ public class Application extends Controller {
 			session("message","DBの在庫数を変更しました : " + itemid);
 		}catch(Exception e){
 			session("message","DBから商品を削除するのに失敗しました");
+		}
+		return redirect(routes.Application.index());
+	}
+
+	@With(BasicAuthAction.class)
+	public static Result delandSell(String itemid){
+		if(session("username")==null){
+			session("message","ログインしてください");
+			return redirect(routes.Application.login());
+		}
+		try{
+			User user = User.find.byId(session("username"));
+			MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token, user.sellerid);
+			MercariItem item = ms.GetItemInfobyItemID(itemid);
+			ms.Cancel(item);
+			ms.Sell(item);
+			session("message","商品の押し上げ成功:" + itemid);
+		}catch(Exception e){
+			session("message","商品の押し上げ失敗:" + itemid);
+		}
+		return redirect(routes.Application.index());
+	}
+	@With(BasicAuthAction.class)
+	public static Result clonesell(String itemid){
+		if(session("username")==null){
+			session("message","ログインしてください");
+			return redirect(routes.Application.login());
+		}
+		try{
+			User user = User.find.byId(session("username"));
+			MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token, user.sellerid);
+			MercariItem item = ms.GetItemInfobyItemID(itemid);
+			ms.Sell(item);
+			session("message","商品のクローン成功:" + itemid);
+		}catch(Exception e){
+			session("message","商品のクローン失敗:" + itemid);
+		}
+		return redirect(routes.Application.index());
+	}
+	@With(BasicAuthAction.class)
+	public static Result cancelItem(String itemid){
+		if(session("username")==null){
+			session("message","ログインしてください");
+			return redirect(routes.Application.login());
+		}
+		try{
+			User user = User.find.byId(session("username"));
+			MercariSearcher ms = new MercariSearcher(user.access_token, user.global_access_token, user.sellerid);
+			MercariItem item = ms.GetItemInfobyItemID(itemid);
+			ms.Cancel(item);
+			session("message","商品の削除成功:" + itemid);
+		}catch(Exception e){
+			session("message","商品の削除失敗:" + itemid);
 		}
 		return redirect(routes.Application.index());
 	}

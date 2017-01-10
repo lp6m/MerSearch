@@ -20,3 +20,8 @@ POST /updateManageInfo controllers.Application.updateManageInfo()
 
 GET /deleteManageItem/:itemid controllers.Application.deleteManageItem(itemid: String)
 GET /updateZaikoNum/:itemid controllers.Application.updateZaikoNum(itemid:String)
+
+GET /delandSell/:itemid controllers.Application.delandSell(itemid:String)
+GET /clonesell/:itemid controllers.Application.clonesell(itemid:String)
+GET /cancelItem/:itemid controllers.Application.cancelItem(itemid:String)
+
